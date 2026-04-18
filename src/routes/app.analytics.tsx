@@ -22,6 +22,7 @@ import { SpendBySupplierChart } from "@/components/analytics/SpendBySupplierChar
 import { CostByCategoryChart } from "@/components/analytics/CostByCategoryChart";
 import { CostTrendChart } from "@/components/analytics/CostTrendChart";
 import { MonthlyReportDialog } from "@/components/analytics/MonthlyReportDialog";
+import { MonthlyReportReminder } from "@/components/analytics/MonthlyReportReminder";
 
 export const Route = createFileRoute("/app/analytics")({
   component: AnalyticsPage,
@@ -44,6 +45,7 @@ function AnalyticsPage() {
   const [stockOpen, setStockOpen] = useState(true);
   const [movementOpen, setMovementOpen] = useState(true);
   const [turnoverOpen, setTurnoverOpen] = useState(true);
+  const [reportOpenSignal, setReportOpenSignal] = useState(0);
 
   const { data: allItems } = useItems();
   const { data: categories } = useCategories();
@@ -110,12 +112,15 @@ function AnalyticsPage() {
             suppliers={suppliers}
             movements={allMovements}
             purchaseOrders={purchaseOrders}
+            openSignal={reportOpenSignal}
           />
           <Button size="sm" variant="outline" onClick={tab === "suppliers" ? handleExportSupplier : handleExportStock}>
             <Download className="mr-1.5 h-4 w-4" /> Export CSV
           </Button>
         </div>
       </div>
+
+      <MonthlyReportReminder onGenerate={() => setReportOpenSignal((n) => n + 1)} />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full justify-start overflow-x-auto">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   exportReportPdf,
   exportReportXlsx,
   exportReportDocx,
+  exportReportTex,
 } from "@/lib/report-exporters";
 import type {
   Item,
@@ -32,7 +33,7 @@ import type {
   PurchaseOrder,
 } from "@/types/inventory";
 
-type Format = "pdf" | "xlsx" | "docx";
+type Format = "pdf" | "xlsx" | "docx" | "tex";
 
 interface Props {
   items: Item[];
@@ -40,6 +41,8 @@ interface Props {
   suppliers: Supplier[];
   movements: StockMovement[];
   purchaseOrders: PurchaseOrder[];
+  /** When this number changes, the dialog auto-opens. */
+  openSignal?: number;
 }
 
 const ALL_SECTIONS: ReportSection[] = [
@@ -56,6 +59,10 @@ export function MonthlyReportDialog(props: Props) {
     new Set(ALL_SECTIONS),
   );
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (props.openSignal !== undefined && props.openSignal > 0) setOpen(true);
+  }, [props.openSignal]);
 
   const toggle = (s: ReportSection) => {
     setSections((prev) => {
@@ -83,7 +90,8 @@ export function MonthlyReportDialog(props: Props) {
       });
       if (format === "pdf") await exportReportPdf(data);
       else if (format === "xlsx") await exportReportXlsx(data);
-      else await exportReportDocx(data);
+      else if (format === "docx") await exportReportDocx(data);
+      else await exportReportTex(data);
       toast.success("Relatório gerado");
       setOpen(false);
     } catch (e) {
@@ -115,9 +123,9 @@ export function MonthlyReportDialog(props: Props) {
             <RadioGroup
               value={format}
               onValueChange={(v) => setFormat(v as Format)}
-              className="grid grid-cols-3 gap-2"
+              className="grid grid-cols-4 gap-2"
             >
-              {(["pdf", "xlsx", "docx"] as const).map((f) => (
+              {(["pdf", "xlsx", "docx", "tex"] as const).map((f) => (
                 <Label
                   key={f}
                   className="flex cursor-pointer items-center gap-2 rounded-md border border-border p-2 has-[:checked]:border-primary has-[:checked]:bg-primary/5"

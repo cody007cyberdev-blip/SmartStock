@@ -5,38 +5,72 @@ import type { ReportData } from "@/lib/monthly-report";
 import { reportFilename } from "@/lib/monthly-report";
 import { renderChartPng } from "@/lib/chart-renderer";
 
+// Stackwise brand (teal primary, derived from oklch(0.55 0.17 162))
+const BRAND = {
+  rgb: [31, 140, 115] as [number, number, number],
+  hex: "1F8C73",
+  hexLight: "E8F5F1",
+  hexDark: "0F4A3D",
+};
+
+function drawPdfHeader(doc: any, data: ReportData, pageW: number) {
+  // Teal band
+  doc.setFillColor(...BRAND.rgb);
+  doc.rect(0, 0, pageW, 70, "F");
+  // Wordmark — bold STACKWISE in white
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  doc.text("STACKWISE", 40, 38);
+  // Tagline
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(220, 240, 235);
+  doc.text("Inventory Command Center", 40, 54);
+  // Right-side document label
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(255, 255, 255);
+  doc.text("RELATÓRIO MENSAL", pageW - 40, 38, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(220, 240, 235);
+  doc.text(data.periodLabel, pageW - 40, 52, { align: "right" });
+  doc.setTextColor(0, 0, 0);
+}
+
 export async function exportReportPdf(data: ReportData): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const autoTable = (await import("jspdf-autotable")).default;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("Relatório Mensal — Stackwise", 40, 50);
+  drawPdfHeader(doc, data, pageW);
+
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(120);
-  doc.text(`Período: ${data.periodLabel}`, 40, 68);
   doc.text(
     `Gerado em ${format(data.generatedAt, "dd/MM/yyyy HH:mm")}`,
     40,
-    82,
+    90,
   );
   doc.setTextColor(0);
 
-  let y = 110;
+  let y = 120;
   if (data.kpis.length) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
+    doc.setTextColor(...BRAND.rgb.map((c) => Math.round(c * 0.6)) as [number, number, number]);
     doc.text("Resumo executivo", 40, y);
+    doc.setTextColor(0);
     y += 10;
     autoTable(doc, {
       startY: y,
       head: [["Indicador", "Valor"]],
       body: data.kpis.map((k) => [k.label, k.value]),
       theme: "striped",
-      headStyles: { fillColor: [40, 90, 80] },
+      headStyles: { fillColor: BRAND.rgb },
       margin: { left: 40, right: 40 },
       styles: { fontSize: 10 },
     });
@@ -48,18 +82,21 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
   for (const t of data.tables) {
     if (y > 720) {
       doc.addPage();
-      y = 50;
+      drawPdfHeader(doc, data, pageW);
+      y = 100;
     }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
+    doc.setTextColor(...BRAND.rgb.map((c) => Math.round(c * 0.6)) as [number, number, number]);
     doc.text(t.title, 40, y);
+    doc.setTextColor(0);
     y += 6;
     autoTable(doc, {
       startY: y + 4,
       head: [t.headers],
       body: t.rows.map((r) => r.map((v) => String(v))),
       theme: "grid",
-      headStyles: { fillColor: [40, 90, 80] },
+      headStyles: { fillColor: BRAND.rgb },
       margin: { left: 40, right: 40 },
       styles: { fontSize: 9, cellPadding: 4 },
     });
@@ -68,31 +105,31 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
         .lastAutoTable.finalY + 24;
   }
 
-  // Charts
   for (const c of data.charts) {
     const png = renderChartPng(c);
     const imgW = pageW - 80;
     const imgH = imgW * 0.4;
     if (y + imgH > 780) {
       doc.addPage();
-      y = 50;
+      drawPdfHeader(doc, data, pageW);
+      y = 100;
     }
     doc.addImage(png, "PNG", 40, y, imgW, imgH);
     y += imgH + 20;
   }
 
-  // footer page numbers
+  // Footer with brand on every page
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
+    const ph = doc.internal.pageSize.getHeight();
+    doc.setDrawColor(...BRAND.rgb);
+    doc.setLineWidth(1);
+    doc.line(40, ph - 28, pageW - 40, ph - 28);
     doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text(
-      `Stackwise · página ${i}/${pages}`,
-      pageW - 40,
-      doc.internal.pageSize.getHeight() - 20,
-      { align: "right" },
-    );
+    doc.setTextColor(120);
+    doc.text("Stackwise · Inventory Report", 40, ph - 16);
+    doc.text(`página ${i}/${pages}`, pageW - 40, ph - 16, { align: "right" });
   }
 
   doc.save(reportFilename("pdf"));
@@ -106,11 +143,24 @@ export async function exportReportXlsx(data: ReportData): Promise<void> {
 
   if (data.kpis.length) {
     const ws = wb.addWorksheet("Resumo");
-    ws.addRow(["Relatório Mensal — Stackwise"]);
-    ws.getCell("A1").font = { bold: true, size: 14 };
+    ws.mergeCells("A1:B1");
+    const title = ws.getCell("A1");
+    title.value = "STACKWISE — Relatório Mensal";
+    title.font = { bold: true, size: 16, color: { argb: "FFFFFFFF" } };
+    title.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: `FF${BRAND.hex}` },
+    };
+    title.alignment = { vertical: "middle", horizontal: "left" };
+    ws.getRow(1).height = 28;
     ws.addRow([`Período: ${data.periodLabel}`]);
     ws.addRow([]);
-    ws.addRow(["Indicador", "Valor"]).font = { bold: true };
+    const head = ws.addRow(["Indicador", "Valor"]);
+    head.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    head.eachCell((c) => {
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${BRAND.hex}` } };
+    });
     data.kpis.forEach((k) => ws.addRow([k.label, k.value]));
     ws.columns = [{ width: 30 }, { width: 22 }];
   }
@@ -123,7 +173,7 @@ export async function exportReportXlsx(data: ReportData): Promise<void> {
       c.fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: "FF285A50" },
+        fgColor: { argb: `FF${BRAND.hex}` },
       };
     });
     t.rows.forEach((r) => ws.addRow(r));
@@ -152,12 +202,13 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
     TableCell,
     WidthType,
     AlignmentType,
+    BorderStyle,
+    ShadingType,
   } = docx;
 
   const headerCell = (text: string) =>
     new TableCell({
-      width: { size: 100 / 8, type: WidthType.PERCENTAGE },
-      shading: { fill: "285A50", type: "clear", color: "auto" },
+      shading: { fill: BRAND.hex, type: ShadingType.CLEAR, color: "auto" },
       children: [
         new Paragraph({
           children: [
@@ -186,13 +237,55 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
       ],
     });
 
+  // Branded banner table (1 row, full width, teal background)
+  const brandBanner = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+    },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            shading: { fill: BRAND.hex, type: ShadingType.CLEAR, color: "auto" },
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "STACKWISE", bold: true, color: "FFFFFF", size: 40 }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "Inventory Command Center · Relatório Mensal",
+                    color: "DCF0EB",
+                    size: 18,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+
+  const heading = (text: string) =>
+    new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [new TextRun({ text, color: BRAND.hexDark, bold: true })],
+    });
+
   const children: Array<InstanceType<typeof Paragraph> | InstanceType<typeof Table>> = [
+    brandBanner,
+    new Paragraph({ text: "" }),
     new Paragraph({
-      heading: HeadingLevel.TITLE,
       alignment: AlignmentType.LEFT,
-      children: [new TextRun({ text: "Relatório Mensal — Stackwise" })],
-    }),
-    new Paragraph({
       children: [
         new TextRun({
           text: `Período: ${data.periodLabel}`,
@@ -215,10 +308,7 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
 
   if (data.kpis.length) {
     children.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: "Resumo executivo" })],
-      }),
+      heading("Resumo executivo"),
       buildTable(
         ["Indicador", "Valor"],
         data.kpis.map((k) => [k.label, k.value]),
@@ -229,10 +319,7 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
 
   for (const t of data.tables) {
     children.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: t.title })],
-      }),
+      heading(t.title),
       buildTable(t.headers, t.rows),
       new Paragraph({ text: "" }),
     );
@@ -246,4 +333,116 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
 
   const blob = await Packer.toBlob(doc);
   saveAs(blob, reportFilename("docx"));
+}
+
+// ============================================================
+// LaTeX exporter — produces a standalone .tex source file.
+// Uses article class + a teal-themed titlepage. Compiles with
+// pdflatex on Overleaf or any local TeX distribution.
+// ============================================================
+
+function escapeTex(input: string | number): string {
+  const s = String(input);
+  return s
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/&/g, "\\&")
+    .replace(/%/g, "\\%")
+    .replace(/\$/g, "\\$")
+    .replace(/#/g, "\\#")
+    .replace(/_/g, "\\_")
+    .replace(/\{/g, "\\{")
+    .replace(/\}/g, "\\}")
+    .replace(/~/g, "\\textasciitilde{}")
+    .replace(/\^/g, "\\textasciicircum{}");
+}
+
+function texTable(headers: string[], rows: (string | number)[][]): string {
+  const colSpec = headers.map(() => "l").join(" | ");
+  const headerRow = headers.map((h) => `\\textbf{${escapeTex(h)}}`).join(" & ");
+  const bodyRows = rows
+    .map((r) => r.map((c) => escapeTex(c)).join(" & ") + " \\\\")
+    .join("\n  \\hline\n  ");
+  return [
+    "\\begin{center}",
+    `\\begin{tabular}{| ${colSpec} |}`,
+    "  \\hline",
+    `  \\rowcolor{stackwiseLight} ${headerRow} \\\\`,
+    "  \\hline",
+    `  ${bodyRows}`,
+    "  \\hline",
+    "\\end{tabular}",
+    "\\end{center}",
+  ].join("\n");
+}
+
+export async function exportReportTex(data: ReportData): Promise<void> {
+  const lines: string[] = [];
+  lines.push("\\documentclass[11pt,a4paper]{article}");
+  lines.push("\\usepackage[utf8]{inputenc}");
+  lines.push("\\usepackage[T1]{fontenc}");
+  lines.push("\\usepackage[margin=2.2cm]{geometry}");
+  lines.push("\\usepackage{xcolor}");
+  lines.push("\\usepackage{colortbl}");
+  lines.push("\\usepackage{tabularx}");
+  lines.push("\\usepackage{fancyhdr}");
+  lines.push("\\usepackage{titling}");
+  lines.push("\\usepackage{helvet}");
+  lines.push("\\renewcommand{\\familydefault}{\\sfdefault}");
+  lines.push(`\\definecolor{stackwiseTeal}{RGB}{${BRAND.rgb.join(",")}}`);
+  lines.push("\\definecolor{stackwiseLight}{RGB}{232,245,241}");
+  lines.push("\\definecolor{stackwiseDark}{RGB}{15,74,61}");
+  lines.push("\\pagestyle{fancy}");
+  lines.push("\\fancyhf{}");
+  lines.push(
+    "\\fancyhead[L]{\\textcolor{stackwiseTeal}{\\textbf{STACKWISE}} \\textcolor{gray}{\\small Relatório Mensal}}",
+  );
+  lines.push("\\fancyhead[R]{\\textcolor{gray}{\\small \\thepage}}");
+  lines.push("\\renewcommand{\\headrulewidth}{0.6pt}");
+  lines.push("\\renewcommand{\\headrule}{\\hbox to\\headwidth{\\color{stackwiseTeal}\\leaders\\hrule height \\headrulewidth\\hfill}}");
+  lines.push("\\begin{document}");
+
+  // Title block (teal banner)
+  lines.push("\\begin{center}");
+  lines.push("\\colorbox{stackwiseTeal}{");
+  lines.push("  \\begin{minipage}{0.96\\textwidth}");
+  lines.push("    \\vspace{0.4cm}");
+  lines.push("    \\color{white}");
+  lines.push("    {\\Huge \\textbf{STACKWISE}}\\\\[2pt]");
+  lines.push("    {\\small Inventory Command Center · Relatório Mensal}\\\\[6pt]");
+  lines.push(`    {\\small Período: ${escapeTex(data.periodLabel)}}\\\\`);
+  lines.push(
+    `    {\\small Gerado em ${escapeTex(format(data.generatedAt, "dd/MM/yyyy HH:mm"))}}`,
+  );
+  lines.push("    \\vspace{0.4cm}");
+  lines.push("  \\end{minipage}");
+  lines.push("}");
+  lines.push("\\end{center}");
+  lines.push("\\vspace{0.6cm}");
+
+  if (data.kpis.length) {
+    lines.push("\\section*{\\textcolor{stackwiseDark}{Resumo executivo}}");
+    lines.push(
+      texTable(["Indicador", "Valor"], data.kpis.map((k) => [k.label, k.value])),
+    );
+  }
+
+  for (const t of data.tables) {
+    lines.push(`\\section*{\\textcolor{stackwiseDark}{${escapeTex(t.title)}}}`);
+    lines.push(texTable(t.headers, t.rows));
+  }
+
+  if (data.charts.length) {
+    lines.push("\\section*{\\textcolor{stackwiseDark}{Gráficos}}");
+    lines.push(
+      "\\textit{Os gráficos do relatório (tendências de estoque e movimentações diárias) estão disponíveis nas versões PDF, XLSX e DOCX. Esta versão LaTeX é editável — adicione \\texttt{\\textbackslash{}includegraphics} aqui se quiser embedar PNGs próprios.}",
+    );
+  }
+
+  lines.push("\\end{document}");
+
+  const tex = lines.join("\n");
+  saveAs(
+    new Blob([tex], { type: "application/x-tex;charset=utf-8" }),
+    reportFilename("tex"),
+  );
 }
