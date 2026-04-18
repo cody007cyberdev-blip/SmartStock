@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import { format } from "date-fns";
 import type { ReportData } from "@/lib/monthly-report";
 import { reportFilename } from "@/lib/monthly-report";
+import { renderChartPng } from "@/lib/chart-renderer";
 
 export async function exportReportPdf(data: ReportData): Promise<void> {
   const { jsPDF } = await import("jspdf");
