@@ -1,7 +1,26 @@
-import type { Notification } from "@/types/inventory";
+import type { Notification, SimulatedEmail } from "@/types/inventory";
 import { OrderStatus } from "@/types/inventory";
 import type { DemoStore } from "@/lib/demo-store";
 import { differenceInDays } from "date-fns";
+
+/** Enqueue a simulated email to all active admins for a given notification. */
+function enqueueEmailForNotification(store: DemoStore, n: Notification): void {
+  const admins = store.getUsers().filter((u) => u.role === "admin" && u.status === "active");
+  for (const admin of admins) {
+    const email: SimulatedEmail = {
+      id: `email-${n.id}-${admin.id}`,
+      to: admin.email,
+      recipientName: admin.name,
+      subject: `[Stackwise] ${n.title}`,
+      body: n.message,
+      type: n.type,
+      referenceId: n.referenceId,
+      createdAt: new Date().toISOString(),
+      status: "queued",
+    };
+    store.addOutboxEmail(email);
+  }
+}
 
 /**
  * Scan items and generate low_stock / zero_stock notifications.
