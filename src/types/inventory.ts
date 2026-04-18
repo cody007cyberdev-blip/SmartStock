@@ -190,3 +190,15 @@ export interface UserRole {
   userId: string;
   role: UserRoleType;
 }
+
+export interface SimulatedEmail {
+  id: string;
+  to: string;
+  recipientName: string;
+  subject: string;
+  body: string;
+  type: NotificationType;
+  referenceId: string | null;
+  createdAt: string;
+  status: "queued" | "sent";
+}

@@ -7,6 +7,7 @@ import type {
   PurchaseOrder,
   InventoryRequest,
   Notification,
+  SimulatedEmail,
 } from "@/types/inventory";
 import { MovementType } from "@/types/inventory";
 import { generateSeedData, type SeedData } from "./demo/index";
@@ -47,6 +48,7 @@ export class DemoStore {
   private data: SeedData;
   private version = 0;
   private users: DemoUser[] = SEED_USERS.map((u) => ({ ...u }));
+  private outbox: SimulatedEmail[] = [];
 
   constructor() {
     this.data = generateSeedData();
@@ -59,6 +61,24 @@ export class DemoStore {
   reset() {
     this.data = generateSeedData();
     this.users = SEED_USERS.map((u) => ({ ...u }));
+    this.outbox = [];
+    this.version++;
+  }
+
+  // ─── Email Outbox (simulated) ─────────────────────────
+  getOutbox(): SimulatedEmail[] {
+    return [...this.outbox].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }
+
+  addOutboxEmail(email: SimulatedEmail): void {
+    this.outbox.push(email);
+    this.version++;
+  }
+
+  clearOutbox(): void {
+    this.outbox = [];
     this.version++;
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search, Plus, Menu, User, LogOut, Settings, ChevronDown, ScanBarcode } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -74,7 +75,7 @@ export function Header() {
         <Menu className="h-5 w-5" />
       </Button>
 
-      <button data-tour="search" type="button" onClick={() => setPaletteOpen(true)} className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-white px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:max-w-sm">
+      <button data-tour="search" type="button" onClick={() => setPaletteOpen(true)} className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:max-w-sm">
         <Search className="h-4 w-4 shrink-0" />
         <span>Search…</span>
         <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs md:inline-block">⌘K</kbd>
@@ -91,6 +92,8 @@ export function Header() {
           <Plus className="h-4 w-4" />
         </Button>
       </PermissionGate>
+
+      <ThemeToggle />
 
       <NotificationBell onClick={() => setNotifOpen(true)} />
 

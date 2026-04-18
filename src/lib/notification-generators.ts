@@ -1,7 +1,26 @@
-import type { Notification } from "@/types/inventory";
+import type { Notification, SimulatedEmail } from "@/types/inventory";
 import { OrderStatus } from "@/types/inventory";
 import type { DemoStore } from "@/lib/demo-store";
 import { differenceInDays } from "date-fns";
+
+/** Enqueue a simulated email to all active admins for a given notification. */
+function enqueueEmailForNotification(store: DemoStore, n: Notification): void {
+  const admins = store.getUsers().filter((u) => u.role === "admin" && u.status === "active");
+  for (const admin of admins) {
+    const email: SimulatedEmail = {
+      id: `email-${n.id}-${admin.id}`,
+      to: admin.email,
+      recipientName: admin.name,
+      subject: `[Stackwise] ${n.title}`,
+      body: n.message,
+      type: n.type,
+      referenceId: n.referenceId,
+      createdAt: new Date().toISOString(),
+      status: "queued",
+    };
+    store.addOutboxEmail(email);
+  }
+}
 
 /**
  * Scan items and generate low_stock / zero_stock notifications.
@@ -44,6 +63,7 @@ export function generateStockAlerts(store: DemoStore): void {
     };
 
     store.addNotification(notification);
+    enqueueEmailForNotification(store, notification);
   }
 }
 
@@ -73,7 +93,7 @@ export function generatePOAlerts(store: DemoStore): void {
         (n) => !n.isRead && n.type === "po_overdue" && n.referenceId === po.id,
       );
       if (!alreadyExists) {
-        store.addNotification({
+        const notif: Notification = {
           id: `notif-auto-po_overdue-${po.id}-${Date.now()}`,
           type: "po_overdue",
           title: `PO Overdue: ${po.orderNumber}`,
@@ -82,7 +102,9 @@ export function generatePOAlerts(store: DemoStore): void {
           link: `/app/purchase-orders?po=${po.id}`,
           referenceId: po.id,
           createdAt: new Date().toISOString(),
-        });
+        };
+        store.addNotification(notif);
+        enqueueEmailForNotification(store, notif);
       }
       continue;
     }
@@ -93,7 +115,7 @@ export function generatePOAlerts(store: DemoStore): void {
         (n) => !n.isRead && n.type === "po_reminder" && n.referenceId === po.id,
       );
       if (!alreadyExists) {
-        store.addNotification({
+        const notif: Notification = {
           id: `notif-auto-po_reminder-${po.id}-${Date.now()}`,
           type: "po_reminder",
           title: `PO Arriving Soon: ${po.orderNumber}`,
@@ -102,7 +124,9 @@ export function generatePOAlerts(store: DemoStore): void {
           link: `/app/purchase-orders?po=${po.id}`,
           referenceId: po.id,
           createdAt: new Date().toISOString(),
-        });
+        };
+        store.addNotification(notif);
+        enqueueEmailForNotification(store, notif);
       }
     }
   }
