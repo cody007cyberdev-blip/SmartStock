@@ -39,6 +39,12 @@ export interface TableSection {
   headers: string[];
   rows: (string | number)[][];
 }
+export interface ChartData {
+  title: string;
+  type: "line" | "bar";
+  labels: string[];
+  series: { label: string; values: number[]; color: string }[];
+}
 
 export interface ReportData {
   generatedAt: Date;
@@ -46,6 +52,7 @@ export interface ReportData {
   windowDays: number;
   kpis: KPI[];
   tables: TableSection[];
+  charts: ChartData[];
 }
 
 export function buildMonthlyReport(input: MonthlyReportInput): ReportData {
@@ -60,6 +67,7 @@ export function buildMonthlyReport(input: MonthlyReportInput): ReportData {
 
   const kpis: KPI[] = [];
   const tables: TableSection[] = [];
+  const charts: ChartData[] = [];
 
   if (input.sections.includes("summary")) {
     const totalValue = input.items.reduce(
@@ -197,6 +205,76 @@ export function buildMonthlyReport(input: MonthlyReportInput): ReportData {
     });
   }
 
+  // ─── Charts (built when relevant sections are selected) ─────
+  if (input.sections.includes("summary") || input.sections.includes("movements")) {
+    const dayLabels: string[] = [];
+    const inSeries: number[] = [];
+    const outSeries: number[] = [];
+    for (let i = windowDays - 1; i >= 0; i--) {
+      const day = subDays(now, i);
+      dayLabels.push(format(day, "dd/MM"));
+      const dayStart = new Date(day);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      let inn = 0;
+      let out = 0;
+      for (const m of recentMoves) {
+        const t = new Date(m.createdAt);
+        if (t >= dayStart && t < dayEnd) {
+          if (m.type === MovementType.Received) inn += m.quantity;
+          else if (m.type === MovementType.Shipped) out += m.quantity;
+        }
+      }
+      inSeries.push(inn);
+      outSeries.push(out);
+    }
+    charts.push({
+      title: `Movimentações por dia (últimos ${windowDays}d)`,
+      type: "bar",
+      labels: dayLabels,
+      series: [
+        { label: "Entradas", values: inSeries, color: "#0d9488" },
+        { label: "Saídas", values: outSeries, color: "#ef4444" },
+      ],
+    });
+
+    // Stock value trend (reconstruct backwards from current stock)
+    const valueTrend: number[] = new Array(windowDays).fill(0);
+    let runningValue = input.items.reduce(
+      (a, i) => a + i.currentStock * i.costPrice,
+      0,
+    );
+    valueTrend[windowDays - 1] = runningValue;
+    for (let i = windowDays - 1; i > 0; i--) {
+      const dayStart = new Date(subDays(now, windowDays - 1 - i));
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      for (const m of recentMoves) {
+        const t = new Date(m.createdAt);
+        if (t >= dayStart && t < dayEnd) {
+          const it = itemMap.get(m.itemId);
+          if (!it) continue;
+          const delta =
+            m.type === MovementType.Received
+              ? m.quantity * it.costPrice
+              : m.type === MovementType.Shipped
+                ? -m.quantity * it.costPrice
+                : 0;
+          runningValue -= delta;
+        }
+      }
+      valueTrend[i - 1] = runningValue;
+    }
+    charts.push({
+      title: `Tendência do valor de estoque (${windowDays}d)`,
+      type: "line",
+      labels: dayLabels,
+      series: [{ label: "Valor ($)", values: valueTrend, color: "#285a50" }],
+    });
+  }
+
   // silence unused warnings from helpers we may need later
   void supplierMap;
 
@@ -206,6 +284,7 @@ export function buildMonthlyReport(input: MonthlyReportInput): ReportData {
     windowDays,
     kpis,
     tables,
+    charts,
   };
 }
 

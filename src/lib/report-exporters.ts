@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import { format } from "date-fns";
 import type { ReportData } from "@/lib/monthly-report";
 import { reportFilename } from "@/lib/monthly-report";
+import { renderChartPng } from "@/lib/chart-renderer";
 
 export async function exportReportPdf(data: ReportData): Promise<void> {
   const { jsPDF } = await import("jspdf");
@@ -65,6 +66,19 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
     y =
       (doc as unknown as { lastAutoTable: { finalY: number } })
         .lastAutoTable.finalY + 24;
+  }
+
+  // Charts
+  for (const c of data.charts) {
+    const png = renderChartPng(c);
+    const imgW = pageW - 80;
+    const imgH = imgW * 0.4;
+    if (y + imgH > 780) {
+      doc.addPage();
+      y = 50;
+    }
+    doc.addImage(png, "PNG", 40, y, imgW, imgH);
+    y += imgH + 20;
   }
 
   // footer page numbers
