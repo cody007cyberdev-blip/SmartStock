@@ -63,6 +63,7 @@ export function generateStockAlerts(store: DemoStore): void {
     };
 
     store.addNotification(notification);
+    enqueueEmailForNotification(store, notification);
   }
 }
 
@@ -92,7 +93,7 @@ export function generatePOAlerts(store: DemoStore): void {
         (n) => !n.isRead && n.type === "po_overdue" && n.referenceId === po.id,
       );
       if (!alreadyExists) {
-        store.addNotification({
+        const notif: Notification = {
           id: `notif-auto-po_overdue-${po.id}-${Date.now()}`,
           type: "po_overdue",
           title: `PO Overdue: ${po.orderNumber}`,
@@ -101,7 +102,9 @@ export function generatePOAlerts(store: DemoStore): void {
           link: `/app/purchase-orders?po=${po.id}`,
           referenceId: po.id,
           createdAt: new Date().toISOString(),
-        });
+        };
+        store.addNotification(notif);
+        enqueueEmailForNotification(store, notif);
       }
       continue;
     }
@@ -112,7 +115,7 @@ export function generatePOAlerts(store: DemoStore): void {
         (n) => !n.isRead && n.type === "po_reminder" && n.referenceId === po.id,
       );
       if (!alreadyExists) {
-        store.addNotification({
+        const notif: Notification = {
           id: `notif-auto-po_reminder-${po.id}-${Date.now()}`,
           type: "po_reminder",
           title: `PO Arriving Soon: ${po.orderNumber}`,
@@ -121,7 +124,9 @@ export function generatePOAlerts(store: DemoStore): void {
           link: `/app/purchase-orders?po=${po.id}`,
           referenceId: po.id,
           createdAt: new Date().toISOString(),
-        });
+        };
+        store.addNotification(notif);
+        enqueueEmailForNotification(store, notif);
       }
     }
   }

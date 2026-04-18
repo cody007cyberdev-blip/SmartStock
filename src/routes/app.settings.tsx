@@ -11,6 +11,7 @@ import { ReorderDefaults } from "@/components/settings/ReorderDefaults";
 import { ReplenishmentModeSettings } from "@/components/settings/ReplenishmentMode";
 import { SystemSettings } from "@/components/settings/SystemSettings";
 import { UserManagement } from "@/components/settings/UserManagement";
+import { EmailOutbox } from "@/components/settings/EmailOutbox";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
@@ -45,6 +46,7 @@ function SettingsPage() {
           <TabsTrigger value="reorder-defaults">Reorder Defaults</TabsTrigger>
           <TabsTrigger value="replenishment">Replenishment</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="email-outbox">Email Outbox</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
@@ -66,6 +68,9 @@ function SettingsPage() {
           </TabsContent>
           <TabsContent value="users">
             <ErrorBoundary><UserManagement /></ErrorBoundary>
+          </TabsContent>
+          <TabsContent value="email-outbox">
+            <ErrorBoundary><EmailOutbox /></ErrorBoundary>
           </TabsContent>
           <TabsContent value="system">
             <ErrorBoundary><SystemSettings /></ErrorBoundary>
