@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
-import { X, CheckCheck, Bell, Settings2 } from "lucide-react";
-import { NotificationPreferences } from "./NotificationPreferences";
+import { X, CheckCheck, Bell, Settings2, Share2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDismissNotification } from "@/hooks/useNotifications";
 import { getNotificationIcon } from "./notification-icons";
+import { buildWhatsAppShareUrl, isShareable } from "@/lib/whatsapp-share";
 import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/types/inventory";
 
@@ -126,6 +126,7 @@ function NotificationItem({
   onClick: () => void;
   onDismiss: () => void;
 }) {
+  const shareable = isShareable(n.type);
   return (
     <div
       className={cn(
@@ -137,7 +138,6 @@ function NotificationItem({
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
     >
-      {/* Unread dot */}
       {!n.isRead && (
         <span className="absolute left-1.5 top-5 h-2 w-2 rounded-full bg-primary" />
       )}
@@ -152,14 +152,29 @@ function NotificationItem({
         </p>
       </div>
 
-      <button
-        type="button"
-        className="shrink-0 self-start rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
-        onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-        aria-label="Dismiss notification"
-      >
-        <X className="h-3.5 w-3.5 text-muted-foreground" />
-      </button>
+      <div className="flex shrink-0 flex-col gap-1 self-start">
+        {shareable && (
+          <a
+            href={buildWhatsAppShareUrl(n)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="rounded p-1 text-[oklch(0.55_0.17_155)] opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+            aria-label="Share via WhatsApp"
+            title="Share via WhatsApp"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+          </a>
+        )}
+        <button
+          type="button"
+          className="rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+          aria-label="Dismiss notification"
+        >
+          <X className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
+      </div>
     </div>
   );
 }
