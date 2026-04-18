@@ -17,6 +17,7 @@ import { ForecastSummary } from "@/components/insights/ForecastSummary";
 import { DemandForecastChart } from "@/components/insights/DemandForecastChart";
 import { ReorderSuggestionCard } from "@/components/insights/ReorderSuggestionCard";
 import { AnomalyAlertCard } from "@/components/insights/AnomalyAlertCard";
+import { MLForecastSummary } from "@/components/insights/MLForecastSummary";
 import { useDemo } from "@/hooks/useDemo";
 import { useUpdateItem } from "@/hooks/useInventoryMutations";
 import { analyzeAllItems, type ReorderAnalysis } from "@/lib/reorder-engine";
