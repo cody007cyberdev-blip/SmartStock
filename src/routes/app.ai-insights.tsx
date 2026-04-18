@@ -134,6 +134,9 @@ function AiInsightsPage() {
         <Badge variant="secondary" className="text-xs">Beta</Badge>
       </div>
 
+      {/* ML Forecast Summary */}
+      <MLForecastSummary items={items} movements={movements} />
+
       {/* Summary Metrics */}
       <ForecastSummary analyses={allAnalyses} />
 
