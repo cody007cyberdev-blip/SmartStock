@@ -11,7 +11,7 @@ import {
   AreaChart,
   ResponsiveContainer,
 } from "recharts";
-import { Brain, TrendingUp, AlertTriangle, Zap } from "lucide-react";
+import { Brain, TrendingUp, AlertTriangle, Zap, Upload, Download } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,10 @@ import { useDemo } from "@/hooks/useDemo";
 import { useUpdateItem } from "@/hooks/useInventoryMutations";
 import { useReplenishmentMode } from "@/hooks/useReplenishmentMode";
 import { forecastAllItems, METHOD_LABELS, type ItemForecast } from "@/lib/ml-forecast";
+import {
+  HistoricalMovementsImport,
+  buildHistoricalTemplateCSV,
+} from "@/components/insights/HistoricalMovementsImport";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/ml-forecast")({
@@ -51,6 +55,20 @@ function MLForecastPage() {
   const [mode] = useReplenishmentMode();
   const [horizon, setHorizon] = useState<Horizon>(30);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+
+  const downloadTemplate = () => {
+    const skus = (demoStore?.getItems() ?? []).slice(0, 3).map((i) => i.sku);
+    const csv = buildHistoricalTemplateCSV(skus);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "historical-movements-template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Template downloaded");
+  };
 
   const items = demoStore?.getItems() ?? [];
   const movements = demoStore?.getMovements() ?? [];
@@ -109,9 +127,17 @@ function MLForecastPage() {
             </p>
           </div>
         </div>
-        <Badge variant="outline" className="gap-1 px-2.5 py-1 font-mono text-[11px] uppercase">
-          <Zap className="h-3 w-3" /> Mode: {mode}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={downloadTemplate} className="gap-1.5">
+            <Download className="h-3.5 w-3.5" /> Template
+          </Button>
+          <Button size="sm" onClick={() => setImportOpen(true)} className="gap-1.5">
+            <Upload className="h-3.5 w-3.5" /> Import history
+          </Button>
+          <Badge variant="outline" className="gap-1 px-2.5 py-1 font-mono text-[11px] uppercase">
+            <Zap className="h-3 w-3" /> Mode: {mode}
+          </Badge>
+        </div>
       </header>
 
       {/* Summary */}
@@ -183,6 +209,8 @@ function MLForecastPage() {
           {selected ? <DetailPanel f={selected} horizon={horizon} setHorizon={setHorizon} onApply={applyForecast} /> : null}
         </div>
       )}
+
+      <HistoricalMovementsImport open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }

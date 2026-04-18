@@ -228,7 +228,17 @@ export class DemoStore {
     return movement;
   }
 
-  // ─── Suppliers ─────────────────────────────────────────
+  /**
+   * Insert historical (retroactive) movements WITHOUT modifying current stock.
+   * Used by the ML import flow so prior-year sales data trains the forecaster
+   * without rewriting today's on-hand quantities.
+   */
+  importHistoricalMovements(movements: StockMovement[]): { inserted: number } {
+    if (movements.length === 0) return { inserted: 0 };
+    this.data.movements.push(...movements);
+    this.version++;
+    return { inserted: movements.length };
+  }
   getSuppliers(): Supplier[] {
     return this.data.suppliers;
   }
