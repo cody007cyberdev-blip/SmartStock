@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,8 @@ interface Props {
   suppliers: Supplier[];
   movements: StockMovement[];
   purchaseOrders: PurchaseOrder[];
+  /** When this number changes, the dialog auto-opens. */
+  openSignal?: number;
 }
 
 const ALL_SECTIONS: ReportSection[] = [
@@ -57,6 +59,10 @@ export function MonthlyReportDialog(props: Props) {
     new Set(ALL_SECTIONS),
   );
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (props.openSignal !== undefined && props.openSignal > 0) setOpen(true);
+  }, [props.openSignal]);
 
   const toggle = (s: ReportSection) => {
     setSections((prev) => {
