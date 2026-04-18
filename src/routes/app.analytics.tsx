@@ -21,6 +21,7 @@ import { SupplierScoreCards, computeMetrics } from "@/components/analytics/Suppl
 import { SpendBySupplierChart } from "@/components/analytics/SpendBySupplierChart";
 import { CostByCategoryChart } from "@/components/analytics/CostByCategoryChart";
 import { CostTrendChart } from "@/components/analytics/CostTrendChart";
+import { MonthlyReportDialog } from "@/components/analytics/MonthlyReportDialog";
 
 export const Route = createFileRoute("/app/analytics")({
   component: AnalyticsPage,
@@ -102,9 +103,18 @@ function AnalyticsPage() {
           <h1 className="text-2xl font-semibold text-foreground">Analytics</h1>
           <p className="text-sm text-muted-foreground">Stock, movement & supplier reports</p>
         </div>
-        <Button size="sm" variant="outline" onClick={tab === "suppliers" ? handleExportSupplier : handleExportStock}>
-          <Download className="mr-1.5 h-4 w-4" /> Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <MonthlyReportDialog
+            items={allItems}
+            categories={categories}
+            suppliers={suppliers}
+            movements={allMovements}
+            purchaseOrders={purchaseOrders}
+          />
+          <Button size="sm" variant="outline" onClick={tab === "suppliers" ? handleExportSupplier : handleExportStock}>
+            <Download className="mr-1.5 h-4 w-4" /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
