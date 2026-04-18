@@ -9,6 +9,7 @@ import {
   MapPin,
   BarChart3,
   Sparkles,
+  Brain,
   Settings,
   ChevronRight,
   HelpCircle,
@@ -55,6 +56,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Analytics", href: "/app/analytics", icon: BarChart3 },
       { label: "AI insights", href: "/app/ai-insights", icon: Sparkles },
+      { label: "ML forecast", href: "/app/ml-forecast", icon: Brain },
     ],
   },
   {
