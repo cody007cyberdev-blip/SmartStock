@@ -172,7 +172,7 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
       ],
     });
 
-  const children: InstanceType<typeof Paragraph>[] | unknown[] = [
+  const children: Array<InstanceType<typeof Paragraph> | InstanceType<typeof Table>> = [
     new Paragraph({
       heading: HeadingLevel.TITLE,
       alignment: AlignmentType.LEFT,
@@ -227,7 +227,7 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
   const doc = new Document({
     creator: "Stackwise",
     title: "Relatório Mensal",
-    sections: [{ children: children as InstanceType<typeof Paragraph>[] }],
+    sections: [{ children }],
   });
 
   const blob = await Packer.toBlob(doc);
