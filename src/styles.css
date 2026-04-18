@@ -1,9 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
-/* Geist Sans — variable font */
+/* Geist Sans — variable font (legacy app shell) */
 @font-face {
   font-family: "Geist Sans";
   src: url("/fonts/Geist-Variable.woff2") format("woff2");
@@ -12,7 +13,7 @@
   font-display: swap;
 }
 
-/* Geist Mono — variable font */
+/* Geist Mono — variable font (legacy app shell) */
 @font-face {
   font-family: "Geist Mono";
   src: url("/fonts/GeistMono-Variable.woff2") format("woff2");
@@ -31,6 +32,11 @@
 @theme inline {
   --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-brand: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-tech: "Space Mono", ui-monospace, monospace;
+  --color-brand-petrol: var(--brand-petrol);
+  --color-brand-emerald: var(--brand-emerald);
+  --color-brand-orange: var(--brand-orange);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -129,6 +135,11 @@
   --stock-low: oklch(0.75 0.15 75);
   --stock-out: oklch(0.60 0.22 25);
   --amber-accent: oklch(0.75 0.15 75);
+
+  /* StockMind brand palette (#2C5AA0 / #10B981 / #F97316) */
+  --brand-petrol: oklch(0.46 0.13 254);
+  --brand-emerald: oklch(0.69 0.17 162);
+  --brand-orange: oklch(0.71 0.19 48);
 }
 
 .dark {
@@ -235,3 +246,41 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;
 }
+
+/* StockMind landing page animations */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-30px, 25px) scale(0.95); }
+}
+.animate-blob { animation: blob-drift 18s ease-in-out infinite; }
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+@keyframes ticker-up {
+  0% { transform: translateY(8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-ticker { animation: ticker-up 0.6s ease-out both; }
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer { animation: shimmer 2.5s linear infinite; }
+
+.font-brand { font-family: var(--font-brand); }
+.font-tech { font-family: var(--font-tech); }
