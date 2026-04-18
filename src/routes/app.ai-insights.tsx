@@ -17,6 +17,7 @@ import { ForecastSummary } from "@/components/insights/ForecastSummary";
 import { DemandForecastChart } from "@/components/insights/DemandForecastChart";
 import { ReorderSuggestionCard } from "@/components/insights/ReorderSuggestionCard";
 import { AnomalyAlertCard } from "@/components/insights/AnomalyAlertCard";
+import { MLForecastSummary } from "@/components/insights/MLForecastSummary";
 import { useDemo } from "@/hooks/useDemo";
 import { useUpdateItem } from "@/hooks/useInventoryMutations";
 import { analyzeAllItems, type ReorderAnalysis } from "@/lib/reorder-engine";
@@ -132,6 +133,9 @@ function AiInsightsPage() {
         <h1 className="text-2xl font-semibold text-foreground">AI insights</h1>
         <Badge variant="secondary" className="text-xs">Beta</Badge>
       </div>
+
+      {/* ML Forecast Summary */}
+      <MLForecastSummary items={items} movements={movements} />
 
       {/* Summary Metrics */}
       <ForecastSummary analyses={allAnalyses} />

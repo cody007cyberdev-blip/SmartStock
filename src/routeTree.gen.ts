@@ -17,6 +17,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppRequestsRouteImport } from './routes/app.requests'
 import { Route as AppPurchaseOrdersRouteImport } from './routes/app.purchase-orders'
 import { Route as AppMovementsRouteImport } from './routes/app.movements'
+import { Route as AppMlForecastRouteImport } from './routes/app.ml-forecast'
 import { Route as AppLocationsRouteImport } from './routes/app.locations'
 import { Route as AppHelpRouteImport } from './routes/app.help'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
@@ -64,6 +65,11 @@ const AppMovementsRoute = AppMovementsRouteImport.update({
   path: '/movements',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMlForecastRoute = AppMlForecastRouteImport.update({
+  id: '/ml-forecast',
+  path: '/ml-forecast',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLocationsRoute = AppLocationsRouteImport.update({
   id: '/locations',
   path: '/locations',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
   '/app/locations': typeof AppLocationsRoute
+  '/app/ml-forecast': typeof AppMlForecastRoute
   '/app/movements': typeof AppMovementsRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/requests': typeof AppRequestsRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
   '/app/locations': typeof AppLocationsRoute
+  '/app/ml-forecast': typeof AppMlForecastRoute
   '/app/movements': typeof AppMovementsRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/requests': typeof AppRequestsRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/help': typeof AppHelpRoute
   '/app/locations': typeof AppLocationsRoute
+  '/app/ml-forecast': typeof AppMlForecastRoute
   '/app/movements': typeof AppMovementsRoute
   '/app/purchase-orders': typeof AppPurchaseOrdersRoute
   '/app/requests': typeof AppRequestsRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/help'
     | '/app/locations'
+    | '/app/ml-forecast'
     | '/app/movements'
     | '/app/purchase-orders'
     | '/app/requests'
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/help'
     | '/app/locations'
+    | '/app/ml-forecast'
     | '/app/movements'
     | '/app/purchase-orders'
     | '/app/requests'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/help'
     | '/app/locations'
+    | '/app/ml-forecast'
     | '/app/movements'
     | '/app/purchase-orders'
     | '/app/requests'
@@ -256,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMovementsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/ml-forecast': {
+      id: '/app/ml-forecast'
+      path: '/ml-forecast'
+      fullPath: '/app/ml-forecast'
+      preLoaderRoute: typeof AppMlForecastRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/locations': {
       id: '/app/locations'
       path: '/locations'
@@ -308,6 +327,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppHelpRoute: typeof AppHelpRoute
   AppLocationsRoute: typeof AppLocationsRoute
+  AppMlForecastRoute: typeof AppMlForecastRoute
   AppMovementsRoute: typeof AppMovementsRoute
   AppPurchaseOrdersRoute: typeof AppPurchaseOrdersRoute
   AppRequestsRoute: typeof AppRequestsRoute
@@ -323,6 +343,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppHelpRoute: AppHelpRoute,
   AppLocationsRoute: AppLocationsRoute,
+  AppMlForecastRoute: AppMlForecastRoute,
   AppMovementsRoute: AppMovementsRoute,
   AppPurchaseOrdersRoute: AppPurchaseOrdersRoute,
   AppRequestsRoute: AppRequestsRoute,
