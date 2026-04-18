@@ -209,6 +209,8 @@ function MLForecastPage() {
           {selected ? <DetailPanel f={selected} horizon={horizon} setHorizon={setHorizon} onApply={applyForecast} /> : null}
         </div>
       )}
+
+      <HistoricalMovementsImport open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }
