@@ -68,6 +68,19 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
         .lastAutoTable.finalY + 24;
   }
 
+  // Charts
+  for (const c of data.charts) {
+    const png = renderChartPng(c);
+    const imgW = pageW - 80;
+    const imgH = imgW * 0.4;
+    if (y + imgH > 780) {
+      doc.addPage();
+      y = 50;
+    }
+    doc.addImage(png, "PNG", 40, y, imgW, imgH);
+    y += imgH + 20;
+  }
+
   // footer page numbers
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
