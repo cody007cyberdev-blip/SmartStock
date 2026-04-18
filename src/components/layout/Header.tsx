@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search, Plus, Menu, User, LogOut, Settings, ChevronDown, ScanBarcode } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -91,6 +92,8 @@ export function Header() {
           <Plus className="h-4 w-4" />
         </Button>
       </PermissionGate>
+
+      <ThemeToggle />
 
       <NotificationBell onClick={() => setNotifOpen(true)} />
 
