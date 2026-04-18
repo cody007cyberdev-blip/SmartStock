@@ -39,6 +39,12 @@ export interface TableSection {
   headers: string[];
   rows: (string | number)[][];
 }
+export interface ChartData {
+  title: string;
+  type: "line" | "bar";
+  labels: string[];
+  series: { label: string; values: number[]; color: string }[];
+}
 
 export interface ReportData {
   generatedAt: Date;
@@ -46,6 +52,7 @@ export interface ReportData {
   windowDays: number;
   kpis: KPI[];
   tables: TableSection[];
+  charts: ChartData[];
 }
 
 export function buildMonthlyReport(input: MonthlyReportInput): ReportData {
