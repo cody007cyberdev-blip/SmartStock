@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
 import {
   Table,
@@ -58,6 +59,7 @@ export function CatalogTable({
   actionRenderer,
   showCheckboxes = true,
 }: CatalogTableProps) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const isMobile = useIsMobile();
 
@@ -102,15 +104,15 @@ export function CatalogTable({
   const allSelected = paged.length > 0 && paged.every((i) => selected.has(i.id));
 
   if (sorted.length === 0) {
-    return <p className="py-16 text-center text-sm text-muted-foreground">No items in catalog</p>;
+    return <p className="py-16 text-center text-sm text-muted-foreground">{t("catalog.table.empty")}</p>;
   }
 
   const pagination = (
     <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-      <span>Showing {start}–{end} of {sorted.length} items</span>
+      <span>{t("catalog.table.showing", { start, end, total: sorted.length })}</span>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => changePage(safePage - 1)}>Previous</Button>
-        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => changePage(safePage + 1)}>Next</Button>
+        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => changePage(safePage - 1)}>{t("common.previous")}</Button>
+        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => changePage(safePage + 1)}>{t("common.next")}</Button>
       </div>
     </div>
   );
@@ -120,11 +122,7 @@ export function CatalogTable({
       <div>
         <div className="space-y-3">
           {paged.map((item) => (
-            <Card
-              key={item.id}
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => onRowClick?.(item)}
-            >
+            <Card key={item.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onRowClick?.(item)}>
               <CardHeader className="pb-2 pt-3 px-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium truncate">{item.name}</CardTitle>
@@ -132,26 +130,12 @@ export function CatalogTable({
                 </div>
               </CardHeader>
               <CardContent className="px-4 pb-3 space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">SKU</span>
-                  <span className="font-mono text-xs">{item.sku}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Qty</span>
-                  <span className="font-mono">{item.currentStock}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
-                  <span className="truncate ml-2">{catMap.get(item.categoryId ?? "") ?? "—"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Supplier</span>
-                  <span className="truncate ml-2">{supMap.get(item.supplierId ?? "") ?? "—"}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-muted-foreground">SKU</span><span className="font-mono text-xs">{item.sku}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("common.quantity")}</span><span className="font-mono">{item.currentStock}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("catalog.table.category")}</span><span className="truncate ml-2">{catMap.get(item.categoryId ?? "") ?? "—"}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("catalog.table.supplier")}</span><span className="truncate ml-2">{supMap.get(item.supplierId ?? "") ?? "—"}</span></div>
                 {actionRenderer && (
-                  <div className="pt-1" onClick={(e) => e.stopPropagation()}>
-                    {actionRenderer(item)}
-                  </div>
+                  <div className="pt-1" onClick={(e) => e.stopPropagation()}>{actionRenderer(item)}</div>
                 )}
               </CardContent>
             </Card>
@@ -164,7 +148,7 @@ export function CatalogTable({
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-md border border-border bg-white">
+      <div className="overflow-x-auto rounded-md border border-border bg-card">
         <Table>
           <TableHeader className="sticky top-0 bg-card">
             <TableRow>
@@ -179,22 +163,18 @@ export function CatalogTable({
                   />
                 </TableHead>
               )}
-              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("name")}>Name<SortIcon col="name" /></TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("name")}>{t("catalog.table.name")}<SortIcon col="name" /></TableHead>
               <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("sku")}>SKU<SortIcon col="sku" /></TableHead>
-              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("categoryId")}>Category<SortIcon col="categoryId" /></TableHead>
-              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("currentStock")}>Qty<SortIcon col="currentStock" /></TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("supplierId")}>Supplier<SortIcon col="supplierId" /></TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("categoryId")}>{t("catalog.table.category")}<SortIcon col="categoryId" /></TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("currentStock")}>{t("catalog.table.qty")}<SortIcon col="currentStock" /></TableHead>
+              <TableHead>{t("catalog.table.location")}</TableHead>
+              <TableHead className="cursor-pointer select-none" onClick={() => toggleSort("supplierId")}>{t("catalog.table.supplier")}<SortIcon col="supplierId" /></TableHead>
               {actionRenderer && <TableHead className="w-12" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {paged.map((item) => (
-              <TableRow
-                key={item.id}
-                className={`cursor-pointer hover:bg-muted/50 ${selected.has(item.id) ? "bg-primary/5" : ""}`}
-                onClick={() => onRowClick?.(item)}
-              >
+              <TableRow key={item.id} className={`cursor-pointer hover:bg-muted/50 ${selected.has(item.id) ? "bg-primary/5" : ""}`} onClick={() => onRowClick?.(item)}>
                 {showCheckboxes && (
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox
@@ -209,15 +189,15 @@ export function CatalogTable({
                 )}
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell className="font-mono text-xs">{item.sku}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{catMap.get(item.categoryId ?? "") ?? (item.categoryId ? <span className="italic text-muted-foreground/60">Unknown Category</span> : "—")}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{catMap.get(item.categoryId ?? "") ?? (item.categoryId ? <span className="italic text-muted-foreground/60">{t("catalog.table.unknownCategory")}</span> : "—")}</TableCell>
                 <TableCell>
                   <span className="inline-flex items-center gap-2">
                     <span className="font-mono text-sm">{item.currentStock}</span>
                     <StatusBadge status={stockStatus(item)} />
                   </span>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">{locMap.get(item.locationId ?? "") ?? (item.locationId ? <span className="italic text-muted-foreground/60">Unknown Location</span> : "—")}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{supMap.get(item.supplierId ?? "") ?? (item.supplierId ? <span className="italic text-muted-foreground/60">Unknown Supplier</span> : "—")}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{locMap.get(item.locationId ?? "") ?? (item.locationId ? <span className="italic text-muted-foreground/60">{t("catalog.table.unknownLocation")}</span> : "—")}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{supMap.get(item.supplierId ?? "") ?? (item.supplierId ? <span className="italic text-muted-foreground/60">{t("catalog.table.unknownSupplier")}</span> : "—")}</TableCell>
                 {actionRenderer && (
                   <TableCell onClick={(e) => e.stopPropagation()}>{actionRenderer(item)}</TableCell>
                 )}

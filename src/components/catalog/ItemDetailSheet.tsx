@@ -1,4 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import { X, Pencil, Archive, Package } from "lucide-react";
 import {
   Sheet,
@@ -41,13 +43,7 @@ interface ItemDetailSheetProps {
   onArchive?: (item: Item) => void;
 }
 
-interface DetailRowProps {
-  label: string;
-  value: React.ReactNode;
-  mono?: boolean;
-}
-
-function DetailRow({ label, value, mono }: DetailRowProps) {
+function DetailRow({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -66,10 +62,14 @@ export function ItemDetailSheet({
   onEdit,
   onArchive,
 }: ItemDetailSheetProps) {
+  const { t, i18n } = useTranslation();
   const { data: allMovements } = useMovements();
   const updateItem = useUpdateItem();
 
   if (!item) return null;
+
+  const dateLocale = i18n.resolvedLanguage === "pt" ? ptBR : enUS;
+  const fmt = (d: string) => format(new Date(d), "dd MMM yyyy", { locale: dateLocale });
 
   const category = categories.find((c) => c.id === item.categoryId);
   const supplier = suppliers.find((s) => s.id === item.supplierId);
@@ -79,7 +79,6 @@ export function ItemDetailSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-[560px] overflow-y-auto p-0">
-        {/* Header */}
         <div className="sticky top-0 z-10 border-b border-border bg-card px-6 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -91,61 +90,54 @@ export function ItemDetailSheet({
             </div>
             <div className="flex shrink-0 items-center gap-1">
               <PermissionGate permission="edit_item">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit?.(item)} aria-label="Edit">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit?.(item)} aria-label={t("common.edit")}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onArchive?.(item)} aria-label="Archive">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onArchive?.(item)} aria-label={t("common.archive")}>
                   <Archive className="h-4 w-4" />
                 </Button>
               </PermissionGate>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)} aria-label="Close">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)} aria-label={t("common.close")}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="overview" className="px-6 pt-4 pb-8">
           <TabsList className="w-full">
-            <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-            <TabsTrigger value="history" className="flex-1">History</TabsTrigger>
-            <TabsTrigger value="custom" className="flex-1">Custom Fields</TabsTrigger>
+            <TabsTrigger value="overview" className="flex-1">{t("catalog.detail.overview")}</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1">{t("catalog.detail.history")}</TabsTrigger>
+            <TabsTrigger value="custom" className="flex-1">{t("catalog.detail.customFields")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Image placeholder */}
             <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30">
               <Package className="h-10 w-10 text-muted-foreground/40" />
             </div>
 
-            {/* Quantity hero */}
             <div className="rounded-lg border border-border bg-card p-4 text-center">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Quantity on Hand</p>
-              <p className={`mt-1 font-mono text-3xl font-bold ${stockColor(item)}`}>
-                {item.currentStock}
-              </p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("catalog.detail.quantityOnHand")}</p>
+              <p className={`mt-1 font-mono text-3xl font-bold ${stockColor(item)}`}>{item.currentStock}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">{item.unit}</p>
             </div>
 
-            {/* Detail grid */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-4">
               <DetailRow label="SKU" value={item.sku} mono />
-              <DetailRow label="Category" value={category?.name} />
-              <DetailRow label="Tags" value="—" />
-              <DetailRow label="Unit of Measure" value={item.unit} />
-              <DetailRow label="Reorder Threshold" value={item.reorderPoint} />
-              <DetailRow label="Reorder Quantity" value={item.reorderQuantity} />
-              <DetailRow label="Preferred Supplier" value={supplier?.name} />
-              <DetailRow label="Location" value={location?.name} />
-              <DetailRow label="Cost Per Unit" value={`$${item.costPrice.toFixed(2)}`} mono />
-              <DetailRow label="Sale Price" value={`$${item.sellingPrice.toFixed(2)}`} mono />
-              <DetailRow label="Description" value={item.description} />
-              <DetailRow label="Created" value={format(new Date(item.createdAt), "MMM d, yyyy")} />
-              <DetailRow label="Updated" value={format(new Date(item.updatedAt), "MMM d, yyyy")} />
+              <DetailRow label={t("catalog.detail.tags")} value="—" />
+              <DetailRow label={t("catalog.table.category")} value={category?.name} />
+              <DetailRow label={t("catalog.detail.uom")} value={item.unit} />
+              <DetailRow label={t("catalog.detail.reorderThreshold")} value={item.reorderPoint} />
+              <DetailRow label={t("catalog.detail.reorderQuantity")} value={item.reorderQuantity} />
+              <DetailRow label={t("catalog.detail.preferredSupplier")} value={supplier?.name} />
+              <DetailRow label={t("catalog.detail.location")} value={location?.name} />
+              <DetailRow label={t("catalog.detail.costPerUnit")} value={`$${item.costPrice.toFixed(2)}`} mono />
+              <DetailRow label={t("catalog.detail.salePrice")} value={`$${item.sellingPrice.toFixed(2)}`} mono />
+              <DetailRow label={t("common.description")} value={item.description} />
+              <DetailRow label={t("catalog.detail.created")} value={fmt(item.createdAt)} />
+              <DetailRow label={t("catalog.detail.updated")} value={fmt(item.updatedAt)} />
             </div>
 
-            {/* Barcode */}
             <BarcodeDisplay
               barcode={item.barcode}
               itemName={item.name}

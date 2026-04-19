@@ -1,6 +1,7 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { formatDistanceToNow } from "date-fns";
-
+import { ptBR, enUS } from "date-fns/locale";
 import { ArrowDownToLine, ArrowUpFromLine, RefreshCw, ArrowRightLeft } from "lucide-react";
 import { MovementType } from "@/types/inventory";
 import type { StockMovement } from "@/types/inventory";
@@ -19,6 +20,8 @@ interface MovementTimelineProps {
 }
 
 export function MovementTimeline({ movements, itemId, maxEntries = 20 }: MovementTimelineProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage === "pt" ? ptBR : enUS;
   const filtered = useMemo(() => {
     return movements
       .filter((m) => m.itemId === itemId)
@@ -27,7 +30,7 @@ export function MovementTimeline({ movements, itemId, maxEntries = 20 }: Movemen
   }, [movements, itemId, maxEntries]);
 
   if (filtered.length === 0) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">No movement history for this item.</p>;
+    return <p className="py-8 text-center text-sm text-muted-foreground">{t("movements.timeline.none")}</p>;
   }
 
   return (
@@ -42,36 +45,27 @@ export function MovementTimeline({ movements, itemId, maxEntries = 20 }: Movemen
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium capitalize">{m.type}</span>
+                <span className="text-sm font-medium">{t(`movements.types.${m.type}`)}</span>
                 <span className={`font-mono text-sm font-semibold ${isPositive ? "text-stock-healthy" : "text-stock-out"}`}>
                   {isPositive ? "+" : ""}{m.quantity}
                 </span>
               </div>
               <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                 <span>{m.performedBy}</span>
-                {m.reference && (
-                  <>
-                    <span>·</span>
-                    <span className="font-mono">{m.reference}</span>
-                  </>
-                )}
+                {m.reference && (<><span>·</span><span className="font-mono">{m.reference}</span></>)}
               </div>
               {m.notes && <p className="mt-0.5 text-xs text-muted-foreground">{m.notes}</p>}
               <p className="mt-0.5 text-[11px] text-muted-foreground/70">
-                {formatDistanceToNow(new Date(m.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(m.createdAt), { addSuffix: true, locale })}
               </p>
             </div>
           </div>
         );
       })}
 
-      {/* View all link */}
       <div className="pt-3 text-center">
-        <a
-          href={`/app/movements?item=${itemId}`}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          View all in movements →
+        <a href={`/app/movements?item=${itemId}`} className="text-sm font-medium text-primary hover:underline">
+          {t("movements.timeline.viewAll")}
         </a>
       </div>
     </div>
