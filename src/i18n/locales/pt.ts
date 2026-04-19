@@ -109,6 +109,7 @@ export const pt = {
       complete: "Tour concluído! Explore livremente ou inicie o tutorial guiado.",
     },
   },
-} as const;
+};
 
 export type Translations = typeof pt;
+
