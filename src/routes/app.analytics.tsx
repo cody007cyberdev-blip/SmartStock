@@ -26,7 +26,7 @@ import { MonthlyReportReminder } from "@/components/analytics/MonthlyReportRemin
 
 export const Route = createFileRoute("/app/analytics")({
   component: AnalyticsPage,
-  head: () => ({ meta: [{ title: "Analytics — Stackwise" }] }),
+  head: () => ({ meta: [{ title: "Analytics — StockMind" }] }),
 });
 
 function AnalyticsPage() {

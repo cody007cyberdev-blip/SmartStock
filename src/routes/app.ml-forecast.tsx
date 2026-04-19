@@ -37,7 +37,7 @@ export const Route = createFileRoute("/app/ml-forecast")({
   component: MLForecastPage,
   head: () => ({
     meta: [
-      { title: "ML Forecast — Stackwise" },
+      { title: "ML Forecast — StockMind" },
       {
         name: "description",
         content:

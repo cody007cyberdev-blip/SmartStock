@@ -128,7 +128,7 @@ export function EmailOutbox() {
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Body</p>
                   <div className="rounded-md bg-muted/40 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
                     {selected.body}
-                    {"\n\n"}—{"\n"}Stackwise · automated alert
+                    {"\n\n"}—{"\n"}StockMind · automated alert
                   </div>
                 </div>
                 <p className="pt-2 text-[10px] text-muted-foreground">
