@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, Plus, Menu, User, LogOut, Settings, ChevronDown, ScanBarcode } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,19 +35,14 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
   requestor: "bg-muted text-muted-foreground border-border",
 };
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Admin",
-  manager: "Manager",
-  requestor: "Requestor",
-};
-
 export function Header() {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [prefsOpen, setPrefsOpen] = useState(false);
-  
+
   const { exitDemoMode } = useDemo();
   const { role } = useRole();
   const navigate = useNavigate();
@@ -71,35 +68,36 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-sm md:px-8">
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+      <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)} aria-label={t("common.openMenu")}>
         <Menu className="h-5 w-5" />
       </Button>
 
       <button data-tour="search" type="button" onClick={() => setPaletteOpen(true)} className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:max-w-sm">
         <Search className="h-4 w-4 shrink-0" />
-        <span>Search…</span>
+        <span>{t("common.search")}…</span>
         <kbd className="ml-auto hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-xs md:inline-block">⌘K</kbd>
       </button>
 
       <PermissionGate permission="log_movement">
-        <Button size="icon" variant="outline" className="shrink-0" aria-label="Quick entry" onClick={() => setQuickEntryOpen(true)}>
+        <Button size="icon" variant="outline" className="shrink-0" aria-label={t("common.quickEntry")} onClick={() => setQuickEntryOpen(true)}>
           <ScanBarcode className="h-4 w-4" />
         </Button>
       </PermissionGate>
 
       <PermissionGate permission="create_item">
-        <Button size="icon" variant="outline" className="shrink-0" aria-label="New item" onClick={() => navigate({ to: "/app/catalog", search: { newItem: "true" } })}>
+        <Button size="icon" variant="outline" className="shrink-0" aria-label={t("common.new")} onClick={() => navigate({ to: "/app/catalog", search: { newItem: "true" } })}>
           <Plus className="h-4 w-4" />
         </Button>
       </PermissionGate>
 
+      <LanguageToggle />
       <ThemeToggle />
 
       <NotificationBell onClick={() => setNotifOpen(true)} />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className="flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 hover:bg-muted transition-colors" aria-label="User menu">
+          <button type="button" className="flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 hover:bg-muted transition-colors" aria-label={t("common.userMenu")}>
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
               <User className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
@@ -111,24 +109,24 @@ export function Header() {
           <DropdownMenuLabel className="flex items-center justify-between font-normal text-xs text-muted-foreground">
             {displayName}
             <Badge variant="outline" className={`ml-2 text-[10px] font-semibold uppercase ${ROLE_BADGE_STYLES[role]}`}>
-              {ROLE_LABELS[role]}
+              {t(`roles.${role}`)}
             </Badge>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate({ to: "/app/settings" })}>
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {t("common.settings")}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExit}>
             <LogOut className="mr-2 h-4 w-4" />
-            Exit demo
+            {t("common.exitDemo")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-[260px] p-0">
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetTitle className="sr-only">{t("common.openMenu")}</SheetTitle>
           <Sidebar onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
@@ -137,7 +135,7 @@ export function Header() {
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
       <NotificationCenter open={notifOpen} onOpenChange={setNotifOpen} onOpenPrefs={() => { setNotifOpen(false); setTimeout(() => setPrefsOpen(true), 300); }} />
       <NotificationPreferences open={prefsOpen} onOpenChange={setPrefsOpen} />
-      
+
     </header>
   );
 }
