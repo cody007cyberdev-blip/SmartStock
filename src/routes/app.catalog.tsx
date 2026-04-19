@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Package } from "lucide-react";
 import { toast } from "sonner";
-import { Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CSVExportButton, type CSVColumn } from "@/components/data/CSVExportButton";
@@ -42,7 +42,7 @@ interface CatalogSearch {
 
 export const Route = createFileRoute("/app/catalog")({
   component: CatalogPage,
-  head: () => ({ meta: [{ title: "Catalog — StockMind" }] }),
+  head: () => ({ meta: [{ title: "Catálogo — StockMind" }] }),
   validateSearch: (search: Record<string, unknown>): CatalogSearch => ({
     item: typeof search.item === "string" ? search.item : undefined,
     newItem: typeof search.newItem === "string" ? search.newItem : undefined,
@@ -50,16 +50,9 @@ export const Route = createFileRoute("/app/catalog")({
 });
 
 function CatalogPage() {
+  const { t } = useTranslation();
   const { item: itemId, newItem } = Route.useSearch();
   const navigate = useNavigate();
-
-  // Auto-open create form when navigated with newItem param
-  useEffect(() => {
-    if (newItem) {
-      setSheetOpen(true);
-      navigate({ to: "/app/catalog", search: {}, replace: true });
-    }
-  }, [newItem, navigate]);
 
   const [filters, setFilters] = useState<ItemFilters>({});
   const [sort, setSort] = useState<SortState>({ key: "name", dir: "asc" });
@@ -70,24 +63,32 @@ function CatalogPage() {
   const [movementItemId, setMovementItemId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
 
+  // Auto-open create form when navigated with newItem param
+  useEffect(() => {
+    if (newItem) {
+      setSheetOpen(true);
+      navigate({ to: "/app/catalog", search: {}, replace: true });
+    }
+  }, [newItem, navigate]);
+
   const importFields = useMemo<ImportField[]>(() => [
-    { key: "name", label: "Name", required: true },
+    { key: "name", label: t("common.name"), required: true },
     { key: "sku", label: "SKU", required: true },
-    { key: "description", label: "Description" },
-    { key: "category", label: "Category" },
-    { key: "supplier", label: "Supplier" },
-    { key: "location", label: "Location" },
-    { key: "quantity", label: "Quantity", numeric: true },
-    { key: "reorderPoint", label: "Reorder Point", numeric: true },
-    { key: "unit", label: "Unit" },
-    { key: "costPrice", label: "Unit Cost", numeric: true },
-    { key: "sellingPrice", label: "Price", numeric: true },
+    { key: "description", label: t("common.description") },
+    { key: "category", label: t("common.category") },
+    { key: "supplier", label: t("catalog.table.supplier") },
+    { key: "location", label: t("catalog.table.location") },
+    { key: "quantity", label: t("catalog.csv.headers.quantity"), numeric: true },
+    { key: "reorderPoint", label: t("catalog.form.reorderPoint"), numeric: true },
+    { key: "unit", label: t("catalog.form.uomLabel") },
+    { key: "costPrice", label: t("catalog.form.costPrice"), numeric: true },
+    { key: "sellingPrice", label: t("catalog.form.sellingPrice"), numeric: true },
     { key: "barcode", label: "Barcode" },
-  ], []);
+  ], [t]);
 
   // Strip stock-level status before passing to store
   const storeFilters = useMemo(() => {
-    const { status, ...rest } = filters;
+    const { status: _status, ...rest } = filters;
     return rest;
   }, [filters]);
 
@@ -114,6 +115,7 @@ function CatalogPage() {
   const closeDetail = useCallback(() => {
     navigate({ to: "/app/catalog", search: {} });
   }, [navigate]);
+
   const items = useMemo(() => {
     let result = allItems.filter((i) => i.status !== ItemStatus.Archived);
     if (filters.status === "in-stock") result = result.filter((i) => i.currentStock > i.reorderPoint);
@@ -125,26 +127,26 @@ function CatalogPage() {
   const existingSkus = useMemo(() => allItems.map((i) => i.sku), [allItems]);
 
   const csvColumns = useMemo<CSVColumn<Item>[]>(() => [
-    { header: "Name", accessor: (i) => i.name },
-    { header: "SKU", accessor: (i) => i.sku },
-    { header: "Category", accessor: (i) => categories.find((c) => c.id === i.categoryId)?.name ?? "" },
-    { header: "Supplier", accessor: (i) => suppliers.find((s) => s.id === i.supplierId)?.name ?? "" },
-    { header: "Location", accessor: (i) => locations.find((l) => l.id === i.locationId)?.name ?? "" },
-    { header: "Quantity", accessor: (i) => i.currentStock },
-    { header: "Reorder Point", accessor: (i) => i.reorderPoint },
-    { header: "Unit Cost", accessor: (i) => i.costPrice },
-    { header: "Price", accessor: (i) => i.sellingPrice },
-    { header: "Status", accessor: (i) => i.status },
-  ], [categories, suppliers, locations]);
+    { header: t("catalog.csv.headers.name"), accessor: (i) => i.name },
+    { header: t("catalog.csv.headers.sku"), accessor: (i) => i.sku },
+    { header: t("catalog.csv.headers.category"), accessor: (i) => categories.find((c) => c.id === i.categoryId)?.name ?? "" },
+    { header: t("catalog.csv.headers.supplier"), accessor: (i) => suppliers.find((s) => s.id === i.supplierId)?.name ?? "" },
+    { header: t("catalog.csv.headers.location"), accessor: (i) => locations.find((l) => l.id === i.locationId)?.name ?? "" },
+    { header: t("catalog.csv.headers.quantity"), accessor: (i) => i.currentStock },
+    { header: t("catalog.csv.headers.reorderPoint"), accessor: (i) => i.reorderPoint },
+    { header: t("catalog.csv.headers.unitCost"), accessor: (i) => i.costPrice },
+    { header: t("catalog.csv.headers.price"), accessor: (i) => i.sellingPrice },
+    { header: t("catalog.csv.headers.status"), accessor: (i) => i.status },
+  ], [categories, suppliers, locations, t]);
 
   const handleSave = useCallback((data: Partial<Item>) => {
     if (editItem) {
       updateItem.mutate({ id: editItem.id, updates: data }, {
-        onSuccess: () => { toast.success("Item updated"); setSheetOpen(false); setEditItem(null); },
-        onError: (e) => toast.error(e.message || "Failed to update item. Please try again."),
+        onSuccess: () => { toast.success(t("catalog.form.updated")); setSheetOpen(false); setEditItem(null); },
+        onError: (e) => toast.error(e.message || t("catalog.form.updateFailed")),
       });
     } else {
-      const newItem: Item = {
+      const created: Item = {
         id: `item-${Date.now()}`,
         sku: data.sku ?? "",
         barcode: data.barcode ?? null,
@@ -165,33 +167,33 @@ function CatalogPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      createItem.mutate(newItem, {
+      createItem.mutate(created, {
         onSuccess: () => {
-          toast.success("Item created", {
-            action: { label: "Undo", onClick: () => { deleteItem.mutate(newItem.id, { onSuccess: () => toast.success("Item creation undone") }); } },
+          toast.success(t("catalog.form.created"), {
+            action: { label: t("catalog.form.undo"), onClick: () => { deleteItem.mutate(created.id, { onSuccess: () => toast.success(t("catalog.form.undone")) }); } },
             duration: 5000,
           });
           setSheetOpen(false);
         },
-        onError: (e) => toast.error(e.message || "Failed to create item. Please try again."),
+        onError: (e) => toast.error(e.message || t("catalog.form.createFailed")),
       });
     }
-  }, [editItem, createItem, updateItem, deleteItem]);
+  }, [editItem, createItem, updateItem, deleteItem, t]);
 
   const handleDelete = useCallback(() => {
     if (!deleteTarget) return;
     if (isAdmin) {
       deleteItem.mutate(deleteTarget.id, {
-        onSuccess: () => { toast.success(`${deleteTarget.name} deleted`); setDeleteTarget(null); },
-        onError: (e) => toast.error(e.message || "Failed to delete item."),
+        onSuccess: () => { toast.success(t("catalog.delete.success", { name: deleteTarget.name, action: t("catalog.delete.deleted") })); setDeleteTarget(null); },
+        onError: (e) => toast.error(e.message || t("catalog.delete.failedDelete")),
       });
     } else {
       updateItem.mutate({ id: deleteTarget.id, updates: { status: ItemStatus.Archived } }, {
-        onSuccess: () => { toast.success(`${deleteTarget.name} archived`); setDeleteTarget(null); },
-        onError: (e) => toast.error(e.message || "Failed to archive item."),
+        onSuccess: () => { toast.success(t("catalog.delete.success", { name: deleteTarget.name, action: t("catalog.delete.archived") })); setDeleteTarget(null); },
+        onError: (e) => toast.error(e.message || t("catalog.delete.failedArchive")),
       });
     }
-  }, [deleteTarget, isAdmin, deleteItem, updateItem]);
+  }, [deleteTarget, isAdmin, deleteItem, updateItem, t]);
 
   const openEdit = (item: Item) => { setEditItem(item); setSheetOpen(true); };
   const openCreate = () => { setEditItem(null); setSheetOpen(true); };
@@ -202,9 +204,9 @@ function CatalogPage() {
     ids.forEach((id) => {
       updateItem.mutate({ id, updates });
     });
-    toast.success(`Updated ${count} items`);
+    toast.success(t("catalog.bulk.updated", { count }));
     setSelected(new Set());
-  }, [selected, updateItem]);
+  }, [selected, updateItem, t]);
 
   const actionRenderer = (item: Item) => (
     <RowActionsMenu
@@ -220,23 +222,19 @@ function CatalogPage() {
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Product Catalog</h1>
-          <p className="text-sm text-muted-foreground">{items.length} items</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t("catalog.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("catalog.countLabel", { count: items.length })}</p>
         </div>
         <div className="flex items-center gap-2">
-          <CSVExportButton
-            data={items}
-            columns={csvColumns}
-            filename="stackwise-items"
-          />
+          <CSVExportButton data={items} columns={csvColumns} filename={t("catalog.csv.filename")} />
           <PermissionGate permission="create_item">
             <Button variant="outline" size="sm" className="hidden gap-1.5 sm:inline-flex" onClick={() => setImportOpen(true)}>
-              <Upload className="h-4 w-4" />Import
+              <Upload className="h-4 w-4" />{t("catalog.importBtn")}
             </Button>
           </PermissionGate>
           <PermissionGate permission="create_item">
             <Button onClick={openCreate} className="hidden gap-1.5 sm:inline-flex">
-              <Plus className="h-4 w-4" />New Item
+              <Plus className="h-4 w-4" />{t("catalog.newItem")}
             </Button>
           </PermissionGate>
         </div>
@@ -250,9 +248,9 @@ function CatalogPage() {
       {allItems.length === 0 ? (
         <EmptyState
           icon={Package}
-          title="No items in your inventory yet"
-          description="Start building your catalog by adding your first product or item."
-          actionLabel={can("create_item") ? "Add First Item" : undefined}
+          title={t("catalog.empty.title")}
+          description={t("catalog.empty.description")}
+          actionLabel={can("create_item") ? t("catalog.empty.action") : undefined}
           onAction={can("create_item") ? openCreate : undefined}
         />
       ) : (
@@ -298,16 +296,20 @@ function CatalogPage() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{isAdmin ? "Delete" : "Archive"} {deleteTarget?.name}?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle>
               {isAdmin
-                ? "This action cannot be undone. Movement history will be preserved but the item will be removed."
-                : "The item will be archived and hidden from the default view."}
+                ? t("catalog.delete.titleDelete", { name: deleteTarget?.name })
+                : t("catalog.delete.titleArchive", { name: deleteTarget?.name })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAdmin ? t("catalog.delete.descDelete") : t("catalog.delete.descArchive")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>{isAdmin ? "Delete" : "Archive"}</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              {isAdmin ? t("common.delete") : t("common.archive")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -317,7 +319,7 @@ function CatalogPage() {
           type="button"
           onClick={openCreate}
           className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-amber-accent shadow-lg transition-transform hover:scale-105 sm:hidden"
-          aria-label="New Item"
+          aria-label={t("catalog.newItem")}
         >
           <Plus className="h-6 w-6" />
         </button>

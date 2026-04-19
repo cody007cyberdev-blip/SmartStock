@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { BarcodeScannerButton } from "@/components/shared/BarcodeScannerButton";
 import type { Category, Supplier, Location } from "@/types/inventory";
 import type { ItemFilters } from "@/lib/demo-store";
 
@@ -20,15 +22,16 @@ interface CatalogFiltersProps {
   locations: Location[];
 }
 
-const STATUS_OPTIONS = [
-  { value: "all", label: "All Status" },
-  { value: "in-stock", label: "In Stock" },
-  { value: "low-stock", label: "Low Stock" },
-  { value: "out-of-stock", label: "Out of Stock" },
-];
-
 export function CatalogFilters({ filters, onChange, categories, suppliers, locations }: CatalogFiltersProps) {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const STATUS_OPTIONS = [
+    { value: "all", label: t("catalog.statusFilter.all") },
+    { value: "in-stock", label: t("catalog.statusFilter.inStock") },
+    { value: "low-stock", label: t("catalog.statusFilter.lowStock") },
+    { value: "out-of-stock", label: t("catalog.statusFilter.outOfStock") },
+  ];
 
   const activeCount = [filters.categoryId, filters.supplierId, filters.status, filters.locationId, filters.search].filter(Boolean).length;
 
@@ -37,48 +40,56 @@ export function CatalogFilters({ filters, onChange, categories, suppliers, locat
 
   const filterControls = (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-      <input
-        type="text"
-        placeholder="Search name or SKU…"
-        value={filters.search ?? ""}
-        onChange={(e) => update({ search: e.target.value || undefined })}
-        className="h-9 w-full rounded-md border border-input bg-white px-3 text-sm outline-none transition-colors focus:border-primary sm:w-48"
-      />
+      <div className="flex w-full items-center gap-2 sm:w-auto">
+        <input
+          type="text"
+          placeholder={t("catalog.searchPlaceholder")}
+          value={filters.search ?? ""}
+          onChange={(e) => update({ search: e.target.value || undefined })}
+          className="h-9 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none transition-colors focus:border-primary sm:w-48"
+        />
+        <BarcodeScannerButton
+          onDetected={(code) => update({ search: code })}
+          size="icon"
+          className="h-9 w-9 shrink-0"
+          ariaLabel={t("common.scanWithCamera")}
+        />
+      </div>
 
       <Select value={filters.categoryId ?? "all"} onValueChange={(v) => update({ categoryId: v === "all" ? undefined : v })}>
-        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder="Category" /></SelectTrigger>
+        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder={t("common.category")} /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem>
+          <SelectItem value="all">{t("catalog.categoryAll")}</SelectItem>
           {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
         </SelectContent>
       </Select>
 
       <Select value={filters.supplierId ?? "all"} onValueChange={(v) => update({ supplierId: v === "all" ? undefined : v })}>
-        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder="Supplier" /></SelectTrigger>
+        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder={t("catalog.table.supplier")} /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Suppliers</SelectItem>
+          <SelectItem value="all">{t("catalog.supplierAll")}</SelectItem>
           {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
         </SelectContent>
       </Select>
 
       <Select value={filters.status ?? "all"} onValueChange={(v) => update({ status: v === "all" ? undefined : v })}>
-        <SelectTrigger className="h-9 w-full sm:w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+        <SelectTrigger className="h-9 w-full sm:w-36"><SelectValue placeholder={t("common.status")} /></SelectTrigger>
         <SelectContent>
           {STATUS_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
         </SelectContent>
       </Select>
 
       <Select value={filters.locationId ?? "all"} onValueChange={(v) => update({ locationId: v === "all" ? undefined : v })}>
-        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder="Location" /></SelectTrigger>
+        <SelectTrigger className="h-9 w-full sm:w-40"><SelectValue placeholder={t("catalog.table.location")} /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Locations</SelectItem>
+          <SelectItem value="all">{t("catalog.locationAll")}</SelectItem>
           {locations.map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
         </SelectContent>
       </Select>
 
       {activeCount > 0 && (
         <Button variant="ghost" size="sm" onClick={clear} className="gap-1 text-muted-foreground">
-          <X className="h-3 w-3" />Clear Filters
+          <X className="h-3 w-3" />{t("common.clearFilters")}
         </Button>
       )}
     </div>
@@ -86,21 +97,19 @@ export function CatalogFilters({ filters, onChange, categories, suppliers, locat
 
   return (
     <>
-      {/* Desktop */}
       <div className="hidden sm:block">{filterControls}</div>
 
-      {/* Mobile */}
       <div className="sm:hidden">
         <Button variant="outline" size="sm" onClick={() => setMobileOpen(true)} className="gap-2">
           <Filter className="h-4 w-4" />
-          Filters
+          {t("common.filters")}
           {activeCount > 0 && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{activeCount}</span>
           )}
         </Button>
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent side="bottom" className="max-h-[80vh]">
-            <SheetTitle>Filters</SheetTitle>
+            <SheetTitle>{t("common.filters")}</SheetTitle>
             <div className="mt-4">{filterControls}</div>
           </SheetContent>
         </Sheet>

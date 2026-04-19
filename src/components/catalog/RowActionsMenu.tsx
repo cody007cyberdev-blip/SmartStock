@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { MoreVertical, Eye, Pencil, ArrowRightLeft, Trash2, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +20,8 @@ interface RowActionsMenuProps {
   onDelete: (item: Item) => void;
 }
 
-export function RowActionsMenu({
-  item,
-  onViewDetails,
-  onEdit,
-  onLogMovement,
-  onDelete,
-}: RowActionsMenuProps) {
+export function RowActionsMenu({ item, onViewDetails, onEdit, onLogMovement, onDelete }: RowActionsMenuProps) {
+  const { t } = useTranslation();
   const { can } = usePermissions();
   const { isAdmin } = useRole();
   const canEdit = can("edit_item");
@@ -34,37 +30,34 @@ export function RowActionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Row actions">
+        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t("common.rowActions")}>
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => onViewDetails(item)}>
-          <Eye className="mr-2 h-4 w-4" />View Details
+          <Eye className="mr-2 h-4 w-4" />{t("catalog.rowMenu.view")}
         </DropdownMenuItem>
-
         {canEdit && (
           <DropdownMenuItem onClick={() => onEdit(item)}>
-            <Pencil className="mr-2 h-4 w-4" />Edit
+            <Pencil className="mr-2 h-4 w-4" />{t("catalog.rowMenu.edit")}
           </DropdownMenuItem>
         )}
-
         {canLog && (
           <DropdownMenuItem onClick={() => onLogMovement(item)}>
-            <ArrowRightLeft className="mr-2 h-4 w-4" />Log Movement
+            <ArrowRightLeft className="mr-2 h-4 w-4" />{t("catalog.rowMenu.logMovement")}
           </DropdownMenuItem>
         )}
-
         {canEdit && (
           <>
             <DropdownMenuSeparator />
             {isAdmin ? (
               <DropdownMenuItem onClick={() => onDelete(item)} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />Delete
+                <Trash2 className="mr-2 h-4 w-4" />{t("catalog.rowMenu.delete")}
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem onClick={() => onDelete(item)}>
-                <Archive className="mr-2 h-4 w-4" />Archive
+                <Archive className="mr-2 h-4 w-4" />{t("catalog.rowMenu.archive")}
               </DropdownMenuItem>
             )}
           </>

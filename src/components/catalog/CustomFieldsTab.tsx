@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PermissionGate } from "@/hooks/usePermissions";
@@ -10,18 +11,15 @@ interface CustomFieldsTabProps {
 }
 
 function FieldInput({ value, onSave, onCancel }: { value: string | number | boolean; onSave: (v: string | number | boolean) => void; onCancel: () => void }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(String(value));
 
   if (typeof value === "boolean") {
     return (
       <div className="flex items-center gap-2">
-        <select
-          value={String(value)}
-          onChange={(e) => onSave(e.target.value === "true")}
-          className="h-8 rounded-md border border-input bg-background px-2 text-sm"
-        >
-          <option value="true">Yes</option>
-          <option value="false">No</option>
+        <select value={String(value)} onChange={(e) => onSave(e.target.value === "true")} className="h-8 rounded-md border border-input bg-background px-2 text-sm">
+          <option value="true">{t("common.yes")}</option>
+          <option value="false">{t("common.no")}</option>
         </select>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCancel}><X className="h-3 w-3" /></Button>
       </div>
@@ -50,6 +48,7 @@ function FieldInput({ value, onSave, onCancel }: { value: string | number | bool
 }
 
 export function CustomFieldsTab({ customFields, onUpdate }: CustomFieldsTabProps) {
+  const { t } = useTranslation();
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const { can } = usePermissions();
   const canEdit = can("edit_item");
@@ -64,9 +63,9 @@ export function CustomFieldsTab({ customFields, onUpdate }: CustomFieldsTabProps
   if (entries.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-sm text-muted-foreground">No custom fields defined.</p>
+        <p className="text-sm text-muted-foreground">{t("catalog.detail.noCustomFields")}</p>
         <PermissionGate permission="access_settings">
-          <p className="mt-1 text-xs text-muted-foreground">Admins can add custom fields in Settings.</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("catalog.detail.adminCanAdd")}</p>
         </PermissionGate>
       </div>
     );
@@ -87,7 +86,7 @@ export function CustomFieldsTab({ customFields, onUpdate }: CustomFieldsTabProps
                 role={canEdit ? "button" : undefined}
                 tabIndex={canEdit ? 0 : undefined}
               >
-                {typeof value === "boolean" ? (value ? "Yes" : "No") : String(value)}
+                {typeof value === "boolean" ? (value ? t("common.yes") : t("common.no")) : String(value)}
               </span>
             )}
           </div>
