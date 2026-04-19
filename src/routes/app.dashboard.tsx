@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { Package, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -14,21 +15,13 @@ import { useAlertGenerator } from "@/hooks/useStockAlertGenerator";
 import { useDemo } from "@/hooks/useDemo";
 import { useOnboarding, type TourStep } from "@/hooks/useOnboarding";
 
-const TOUR_STEPS: TourStep[] = [
-  { title: "Welcome to Stackwise!", description: "Let's take a quick tour of the key features. This will only take a minute." },
-  { target: "sidebar", title: "Navigation", description: "Use the sidebar to switch between sections — catalog, movements, suppliers, and more." },
-  { target: "metrics", title: "Stock health", description: "Your inventory health at a glance — total SKUs, in-stock, low-stock, and out-of-stock counts." },
-  { target: "needs-attention", title: "Needs attention", description: "Items that need action appear here — low stock, overdue POs, and pending requests." },
-  { target: "search", title: "Command palette", description: "Press CMD+K (or Ctrl+K) to search anything — items, suppliers, orders, and more." },
-  { title: "You're all set!", description: "Explore the app or try the guided walkthrough to learn the core workflow. Happy managing!" },
-];
-
 export const Route = createFileRoute("/app/dashboard")({
   component: DashboardPage,
-  head: () => ({ meta: [{ title: "Dashboard — Stackwise" }] }),
+  head: () => ({ meta: [{ title: "Painel — StockMind" }] }),
 });
 
 function DashboardPage() {
+  const { t } = useTranslation();
   const { data: summary } = useStockSummary();
   const { demoStore, isDemo } = useDemo();
   useAlertGenerator();
@@ -38,7 +31,15 @@ function DashboardPage() {
   const suppliers = demoStore?.getSuppliers() ?? [];
 
   const tour = useOnboarding("dashboard");
-  
+
+  const TOUR_STEPS: TourStep[] = [
+    { title: t("dashboard.tour.welcomeTitle"), description: t("dashboard.tour.welcomeDesc") },
+    { target: "sidebar", title: t("dashboard.tour.navTitle"), description: t("dashboard.tour.navDesc") },
+    { target: "metrics", title: t("dashboard.tour.stockTitle"), description: t("dashboard.tour.stockDesc") },
+    { target: "needs-attention", title: t("dashboard.tour.attentionTitle"), description: t("dashboard.tour.attentionDesc") },
+    { target: "search", title: t("dashboard.tour.paletteTitle"), description: t("dashboard.tour.paletteDesc") },
+    { title: t("dashboard.tour.doneTitle"), description: t("dashboard.tour.doneDesc") },
+  ];
 
   // Auto-start tour on first demo visit
   useEffect(() => {
@@ -50,22 +51,22 @@ function DashboardPage() {
 
   const handleTourComplete = () => {
     tour.completeTour();
-    toast.success("Tour complete! Explore freely or start the walkthrough.");
+    toast.success(t("dashboard.tour.complete"));
   };
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome back — here's your inventory overview.</p>
+        <h1 className="text-2xl font-semibold text-foreground">{t("dashboard.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("dashboard.welcome")}</p>
       </div>
 
       <div data-tour="metrics" className="rounded-xl border border-border bg-card p-3 shadow-xs">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard label="Total SKUs" value={summary.total} accentColor="neutral" icon={Package} />
-          <MetricCard label="In stock" value={summary.inStock} accentColor="healthy" icon={CheckCircle2} />
-          <MetricCard label="Low stock" value={summary.lowStock} accentColor="warning" icon={AlertTriangle} />
-          <MetricCard label="Out of stock" value={summary.outOfStock} accentColor="danger" icon={XCircle} />
+          <MetricCard label={t("dashboard.metrics.totalSkus")} value={summary.total} accentColor="neutral" icon={Package} />
+          <MetricCard label={t("dashboard.metrics.inStock")} value={summary.inStock} accentColor="healthy" icon={CheckCircle2} />
+          <MetricCard label={t("dashboard.metrics.lowStock")} value={summary.lowStock} accentColor="warning" icon={AlertTriangle} />
+          <MetricCard label={t("dashboard.metrics.outOfStock")} value={summary.outOfStock} accentColor="danger" icon={XCircle} />
         </div>
       </div>
 
@@ -86,8 +87,6 @@ function DashboardPage() {
         onSkip={tour.skipTour}
         onComplete={handleTourComplete}
       />
-
-      
     </div>
   );
 }
