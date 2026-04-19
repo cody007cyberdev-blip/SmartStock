@@ -1,19 +1,21 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { LayoutDashboard, Package, ArrowLeftRight, ClipboardList, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "./Sidebar";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
-  { label: "Catalog", href: "/app/catalog", icon: Package },
-  { label: "Movements", href: "/app/movements", icon: ArrowLeftRight },
-  { label: "Orders", href: "/app/purchase-orders", icon: ClipboardList },
+  { labelKey: "nav.dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+  { labelKey: "nav.catalog", href: "/app/catalog", icon: Package },
+  { labelKey: "nav.movements", href: "/app/movements", icon: ArrowLeftRight },
+  { labelKey: "nav.orders", href: "/app/purchase-orders", icon: ClipboardList },
 ] as const;
 
 export function BottomNav() {
   const location = useLocation();
+  const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isActive = (href: string) => location.pathname === href;
@@ -31,7 +33,7 @@ export function BottomNav() {
             )}
           >
             <item.icon className="h-5 w-5" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
         <button
@@ -40,13 +42,13 @@ export function BottomNav() {
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] text-muted-foreground min-h-[44px]"
         >
           <MoreHorizontal className="h-5 w-5" />
-          More
+          {t("nav.more")}
         </button>
       </nav>
 
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent side="bottom" className="max-h-[70vh] p-0">
-          <SheetTitle className="sr-only">More navigation</SheetTitle>
+          <SheetTitle className="sr-only">{t("nav.more")}</SheetTitle>
           <Sidebar onNavigate={() => setMoreOpen(false)} />
         </SheetContent>
       </Sheet>

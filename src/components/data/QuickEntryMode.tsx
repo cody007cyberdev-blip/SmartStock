@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { BarcodeScannerButton } from "@/components/shared/BarcodeScannerButton";
 import { useItems } from "@/hooks/useInventoryData";
 import { useCreateMovement } from "@/hooks/useInventoryMutations";
 import { MovementType } from "@/types/inventory";
@@ -131,13 +132,27 @@ export function QuickEntryMode({ open, onOpenChange }: QuickEntryModeProps) {
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleLookup(); }}
-                placeholder="Scan or type barcode…"
+                placeholder="Escaneie ou digite o código…"
                 className="h-12 text-lg font-mono"
                 autoFocus
                 autoComplete="off"
               />
+              <BarcodeScannerButton
+                onDetected={(code) => {
+                  setBarcodeInput(code);
+                  setTimeout(() => {
+                    const item = (items ?? []).find(
+                      (i) => i.barcode?.toLowerCase() === code.toLowerCase() || i.sku.toLowerCase() === code.toLowerCase()
+                    );
+                    if (item) { setFoundItem(item); setNotFound(null); }
+                    else { setFoundItem(null); setNotFound(code); }
+                  }, 0);
+                }}
+                size="icon"
+                className="h-12 w-12"
+              />
               <Button onClick={handleLookup} className="h-12 px-5" disabled={!barcodeInput.trim()}>
-                Look up
+                Buscar
               </Button>
             </div>
           </div>

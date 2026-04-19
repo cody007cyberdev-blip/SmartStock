@@ -6,7 +6,7 @@ import type { Notification } from "@/types/inventory";
  */
 export function buildWhatsAppShareUrl(n: Notification): string {
   const lines: string[] = [];
-  lines.push(`*[Stackwise] ${n.title}*`);
+  lines.push(`*[StockMind] ${n.title}*`);
   if (n.message) lines.push("", n.message);
   if (typeof window !== "undefined" && n.link) {
     lines.push("", `${window.location.origin}${n.link}`);

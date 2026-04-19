@@ -15,7 +15,7 @@ import { EmailOutbox } from "@/components/settings/EmailOutbox";
 
 export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
-  head: () => ({ meta: [{ title: "Settings — Stackwise" }] }),
+  head: () => ({ meta: [{ title: "Settings — StockMind" }] }),
 });
 
 function SettingsPage() {

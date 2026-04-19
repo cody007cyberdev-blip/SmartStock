@@ -11,7 +11,7 @@ function enqueueEmailForNotification(store: DemoStore, n: Notification): void {
       id: `email-${n.id}-${admin.id}`,
       to: admin.email,
       recipientName: admin.name,
-      subject: `[Stackwise] ${n.title}`,
+      subject: `[StockMind] ${n.title}`,
       body: n.message,
       type: n.type,
       referenceId: n.referenceId,

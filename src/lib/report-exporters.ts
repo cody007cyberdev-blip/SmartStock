@@ -5,7 +5,7 @@ import type { ReportData } from "@/lib/monthly-report";
 import { reportFilename } from "@/lib/monthly-report";
 import { renderChartPng } from "@/lib/chart-renderer";
 
-// Stackwise brand (teal primary, derived from oklch(0.55 0.17 162))
+// StockMind brand (teal primary, derived from oklch(0.55 0.17 162))
 const BRAND = {
   rgb: [31, 140, 115] as [number, number, number],
   hex: "1F8C73",
@@ -128,7 +128,7 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
     doc.line(40, ph - 28, pageW - 40, ph - 28);
     doc.setFontSize(8);
     doc.setTextColor(120);
-    doc.text("Stackwise · Inventory Report", 40, ph - 16);
+    doc.text("StockMind · Inventory Report", 40, ph - 16);
     doc.text(`página ${i}/${pages}`, pageW - 40, ph - 16, { align: "right" });
   }
 
@@ -138,7 +138,7 @@ export async function exportReportPdf(data: ReportData): Promise<void> {
 export async function exportReportXlsx(data: ReportData): Promise<void> {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Stackwise";
+  wb.creator = "StockMind";
   wb.created = data.generatedAt;
 
   if (data.kpis.length) {
@@ -326,7 +326,7 @@ export async function exportReportDocx(data: ReportData): Promise<void> {
   }
 
   const doc = new Document({
-    creator: "Stackwise",
+    creator: "StockMind",
     title: "Relatório Mensal",
     sections: [{ children }],
   });

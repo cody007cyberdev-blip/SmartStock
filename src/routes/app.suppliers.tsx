@@ -20,7 +20,7 @@ interface SuppliersSearch {
 
 export const Route = createFileRoute("/app/suppliers")({
   component: SuppliersPage,
-  head: () => ({ meta: [{ title: "Suppliers — Stackwise" }] }),
+  head: () => ({ meta: [{ title: "Suppliers — StockMind" }] }),
   validateSearch: (search: Record<string, unknown>): SuppliersSearch => ({
     supplier: typeof search.supplier === "string" ? search.supplier : undefined,
   }),

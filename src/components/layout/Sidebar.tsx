@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Package,
@@ -20,57 +21,62 @@ import { useRole } from "@/hooks/useRole";
 import type { RolePermissions } from "@/lib/roles";
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   permKey?: keyof RolePermissions;
 }
 
 interface NavGroup {
-  label: string;
+  labelKey: string;
+  groupKey: string;
   items: NavItem[];
   permKey?: keyof RolePermissions;
 }
 
 const navGroups: NavGroup[] = [
   {
-    label: "Operations",
+    labelKey: "nav.operations",
+    groupKey: "operations",
     items: [
-      { label: "Dashboard", href: "/app/dashboard", icon: LayoutDashboard },
-      { label: "Catalog", href: "/app/catalog", icon: Package },
-      { label: "Movements", href: "/app/movements", icon: ArrowLeftRight, permKey: "canLogMovements" },
-      { label: "Locations", href: "/app/locations", icon: MapPin },
+      { labelKey: "nav.dashboard", href: "/app/dashboard", icon: LayoutDashboard },
+      { labelKey: "nav.catalog", href: "/app/catalog", icon: Package },
+      { labelKey: "nav.movements", href: "/app/movements", icon: ArrowLeftRight, permKey: "canLogMovements" },
+      { labelKey: "nav.locations", href: "/app/locations", icon: MapPin },
     ],
   },
   {
-    label: "Procurement",
+    labelKey: "nav.procurement",
+    groupKey: "procurement",
     permKey: "canManagePOs",
     items: [
-      { label: "Suppliers", href: "/app/suppliers", icon: Truck },
-      { label: "Purchase orders", href: "/app/purchase-orders", icon: ClipboardList },
+      { labelKey: "nav.suppliers", href: "/app/suppliers", icon: Truck },
+      { labelKey: "nav.purchaseOrders", href: "/app/purchase-orders", icon: ClipboardList },
     ],
   },
   {
-    label: "Intelligence",
+    labelKey: "nav.intelligence",
+    groupKey: "intelligence",
     permKey: "canViewAnalytics",
     items: [
-      { label: "Analytics", href: "/app/analytics", icon: BarChart3 },
-      { label: "AI insights", href: "/app/ai-insights", icon: Sparkles },
-      { label: "ML forecast", href: "/app/ml-forecast", icon: Brain },
+      { labelKey: "nav.analytics", href: "/app/analytics", icon: BarChart3 },
+      { labelKey: "nav.aiInsights", href: "/app/ai-insights", icon: Sparkles },
+      { labelKey: "nav.mlForecast", href: "/app/ml-forecast", icon: Brain },
     ],
   },
   {
-    label: "Admin",
+    labelKey: "nav.admin",
+    groupKey: "admin",
     permKey: "canAccessSettings",
     items: [
-      { label: "Settings", href: "/app/settings", icon: Settings },
+      { labelKey: "nav.settings", href: "/app/settings", icon: Settings },
     ],
   },
 ];
 
 const standaloneLinks: NavItem[] = [
-  { label: "Requests", href: "/app/requests", icon: Inbox },
-  { label: "Help", href: "/app/help", icon: HelpCircle },
+  { labelKey: "nav.requests", href: "/app/requests", icon: Inbox },
+  { labelKey: "nav.help", href: "/app/help", icon: HelpCircle },
 ];
 
 interface SidebarProps {
@@ -79,11 +85,12 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const { permissions } = useRole();
 
-  const toggleGroup = (label: string) => {
-    setCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
+  const toggleGroup = (key: string) => {
+    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const isActive = (href: string) => location.pathname === href;
@@ -99,23 +106,23 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   return (
     <nav data-tour="sidebar" className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center gap-2 px-5">
-        <Package className="h-5 w-5 text-sidebar-primary" />
-        <span className="text-lg font-semibold tracking-tight text-sidebar-primary-foreground">Stackwise</span>
+        <Brain className="h-5 w-5 text-sidebar-primary" />
+        <span className="text-lg font-semibold tracking-tight text-sidebar-primary-foreground">StockMind</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-2">
         {visibleGroups.map((group, idx) => {
-          const isCollapsed = collapsed[group.label] ?? false;
+          const isCollapsed = collapsed[group.groupKey] ?? false;
           return (
-            <div key={group.label}>
+            <div key={group.groupKey}>
               {idx > 0 && <div className="mx-2 my-2 border-t border-sidebar-border" />}
               <button
                 type="button"
-                onClick={() => toggleGroup(group.label)}
+                onClick={() => toggleGroup(group.groupKey)}
                 className="flex w-full items-center gap-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
               >
                 <ChevronRight className={cn("h-3 w-3 transition-transform duration-150", !isCollapsed && "rotate-90")} />
-                {group.label}
+                {t(group.labelKey)}
               </button>
 
               {!isCollapsed && (
@@ -133,7 +140,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {item.label}
+                      {t(item.labelKey)}
                     </Link>
                   ))}
                 </div>
@@ -157,7 +164,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </div>
