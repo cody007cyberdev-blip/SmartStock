@@ -17,7 +17,7 @@ import { useOnboarding, type TourStep } from "@/hooks/useOnboarding";
 
 export const Route = createFileRoute("/app/dashboard")({
   component: DashboardPage,
-  head: () => ({ meta: [{ title: "Painel — StockMind" }] }),
+  head: () => ({ meta: [{ title: "StockMind" }] }),
 });
 
 function DashboardPage() {
