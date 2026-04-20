@@ -14,7 +14,7 @@ import { useMovements, useItems, useLocations } from "@/hooks/useInventoryData";
 import { PermissionGate } from "@/hooks/usePermissions";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
-import { i18n } from "@/i18n";
+import i18n from "@/i18n";
 import type { StockMovement } from "@/types/inventory";
 
 export const Route = createFileRoute("/app/movements")({
