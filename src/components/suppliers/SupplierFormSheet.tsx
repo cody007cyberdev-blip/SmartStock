@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,20 +25,6 @@ import { toast } from "sonner";
 import { useCreateSupplier, useUpdateSupplier } from "@/hooks/useInventoryMutations";
 import type { Supplier } from "@/types/inventory";
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  contactName: z.string(),
-  email: z.string().email("Invalid email").or(z.literal("")),
-  phone: z.string(),
-  address: z.string(),
-  notes: z.string(),
-  paymentTerms: z.string(),
-  leadTimeDays: z.coerce.number().int().min(0, "Must be 0 or more"),
-  minOrderQuantity: z.coerce.number().int().min(0, "Must be 0 or more"),
-});
-
-type FormValues = z.infer<typeof schema>;
-
 interface SupplierFormSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,9 +32,24 @@ interface SupplierFormSheetProps {
 }
 
 export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = !!supplier;
   const createSupplier = useCreateSupplier();
   const updateSupplier = useUpdateSupplier();
+
+  const schema = z.object({
+    name: z.string().min(1, t("suppliers.form.nameRequired")),
+    contactName: z.string(),
+    email: z.string().email(t("suppliers.form.invalidEmail")).or(z.literal("")),
+    phone: z.string(),
+    address: z.string(),
+    notes: z.string(),
+    paymentTerms: z.string(),
+    leadTimeDays: z.coerce.number().int().min(0, t("suppliers.form.mustBeNonNeg")),
+    minOrderQuantity: z.coerce.number().int().min(0, t("suppliers.form.mustBeNonNeg")),
+  });
+
+  type FormValues = z.infer<typeof schema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -104,10 +106,10 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
         },
         {
           onSuccess: () => {
-            toast.success("Supplier updated");
+            toast.success(t("suppliers.form.updated"));
             onOpenChange(false);
           },
-          onError: (e) => toast.error(e.message || "Failed to update supplier."),
+          onError: (e) => toast.error(e.message || t("suppliers.form.updateFailed")),
         },
       );
     } else {
@@ -127,10 +129,10 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
       };
       createSupplier.mutate(newSupplier, {
         onSuccess: () => {
-          toast.success("Supplier created");
+          toast.success(t("suppliers.form.created"));
           onOpenChange(false);
         },
-        onError: (e) => toast.error(e.message || "Failed to create supplier."),
+        onError: (e) => toast.error(e.message || t("suppliers.form.createFailed")),
       });
     }
   }
@@ -139,9 +141,9 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{isEdit ? "Edit Supplier" : "New Supplier"}</SheetTitle>
+          <SheetTitle>{isEdit ? t("suppliers.form.titleEdit") : t("suppliers.form.titleNew")}</SheetTitle>
           <SheetDescription>
-            {isEdit ? "Update supplier details." : "Add a new supplier to the directory."}
+            {isEdit ? t("suppliers.form.descEdit") : t("suppliers.form.descNew")}
           </SheetDescription>
         </SheetHeader>
 
@@ -152,8 +154,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name *</FormLabel>
-                  <FormControl><Input {...field} placeholder="Supplier name" /></FormControl>
+                  <FormLabel>{t("suppliers.form.nameLabel")}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t("suppliers.form.namePh")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -164,8 +166,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
               name="contactName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contact Person</FormLabel>
-                  <FormControl><Input {...field} placeholder="Contact name" /></FormControl>
+                  <FormLabel>{t("suppliers.form.contactLabel")}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t("suppliers.form.contactPh")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -177,8 +179,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl><Input type="email" {...field} placeholder="email@example.com" /></FormControl>
+                    <FormLabel>{t("suppliers.form.emailLabel")}</FormLabel>
+                    <FormControl><Input type="email" {...field} placeholder={t("suppliers.form.emailPh")} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -188,8 +190,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <FormControl><Input {...field} placeholder="+1 555 000 0000" /></FormControl>
+                    <FormLabel>{t("suppliers.form.phoneLabel")}</FormLabel>
+                    <FormControl><Input {...field} placeholder={t("suppliers.form.phonePh")} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -201,8 +203,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl><Textarea {...field} rows={2} placeholder="Street, City, State" /></FormControl>
+                  <FormLabel>{t("suppliers.form.addressLabel")}</FormLabel>
+                  <FormControl><Textarea {...field} rows={2} placeholder={t("suppliers.form.addressPh")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -214,7 +216,7 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
                 name="leadTimeDays"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Lead Time (days)</FormLabel>
+                    <FormLabel>{t("suppliers.form.leadTimeLabel")}</FormLabel>
                     <FormControl><Input type="number" min={0} {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,7 +227,7 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
                 name="minOrderQuantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Min Order Qty</FormLabel>
+                    <FormLabel>{t("suppliers.form.minOrderLabel")}</FormLabel>
                     <FormControl><Input type="number" min={0} {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -238,8 +240,8 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
               name="paymentTerms"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Terms</FormLabel>
-                  <FormControl><Input {...field} placeholder="Net 30, COD, etc." /></FormControl>
+                  <FormLabel>{t("suppliers.form.paymentTermsLabel")}</FormLabel>
+                  <FormControl><Input {...field} placeholder={t("suppliers.form.paymentTermsPh")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -250,16 +252,16 @@ export function SupplierFormSheet({ open, onOpenChange, supplier }: SupplierForm
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl><Textarea {...field} rows={3} placeholder="Additional notes…" /></FormControl>
+                  <FormLabel>{t("suppliers.form.notesLabel")}</FormLabel>
+                  <FormControl><Textarea {...field} rows={3} placeholder={t("suppliers.form.notesPh")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit">{isEdit ? "Save Changes" : "Create Supplier"}</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+              <Button type="submit">{isEdit ? t("suppliers.form.submitEdit") : t("suppliers.form.submitNew")}</Button>
             </div>
           </form>
         </Form>

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { BarChart3 } from "lucide-react";
 import type { PurchaseOrder } from "@/types/inventory";
 import { OrderStatus } from "@/types/inventory";
@@ -25,7 +26,6 @@ function computeMetrics(pos: PurchaseOrder[]): Metrics {
     return { avgLeadTime: null, fulfillmentAccuracy: null, totalOrders: total, onTimeRate: null };
   }
 
-  // Avg lead time: days between createdAt and updatedAt (proxy for receipt date)
   const leadTimes = received.map((po) => {
     const created = new Date(po.createdAt).getTime();
     const updated = new Date(po.updatedAt).getTime();
@@ -33,7 +33,6 @@ function computeMetrics(pos: PurchaseOrder[]): Metrics {
   });
   const avgLeadTime = leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length;
 
-  // Fulfillment accuracy: % of line items fully received
   let totalLines = 0;
   let fulfilledLines = 0;
   for (const po of received) {
@@ -44,7 +43,6 @@ function computeMetrics(pos: PurchaseOrder[]): Metrics {
   }
   const fulfillmentAccuracy = totalLines > 0 ? (fulfilledLines / totalLines) * 100 : 100;
 
-  // On-time delivery: received by expectedDelivery date
   const withExpected = received.filter((po) => po.expectedDelivery);
   let onTime = 0;
   for (const po of withExpected) {
@@ -58,6 +56,7 @@ function computeMetrics(pos: PurchaseOrder[]): Metrics {
 }
 
 export function SupplierPerformance({ purchaseOrders, supplierId }: SupplierPerformanceProps) {
+  const { t } = useTranslation();
   const supplierPOs = useMemo(
     () => purchaseOrders.filter((po) => po.supplierId === supplierId),
     [purchaseOrders, supplierId],
@@ -69,23 +68,23 @@ export function SupplierPerformance({ purchaseOrders, supplierId }: SupplierPerf
     <div className="mt-8" data-testid="supplier-performance">
       <div className="flex items-center gap-2 mb-3">
         <BarChart3 className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold text-foreground">Performance</h3>
+        <h3 className="text-sm font-semibold text-foreground">{t("suppliers.detail.performance")}</h3>
       </div>
 
       {metrics.avgLeadTime === null ? (
         <p className="text-sm text-muted-foreground py-4">
-          Not enough data to calculate performance.
+          {t("suppliers.detail.notEnoughData")}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          <MetricCard label="Avg Lead Time" value={`${metrics.avgLeadTime.toFixed(0)} days`} />
+          <MetricCard label={t("suppliers.detail.avgLeadTime")} value={t("suppliers.detail.days", { count: Math.round(metrics.avgLeadTime) })} />
           <MetricCard
-            label="Fulfillment Accuracy"
+            label={t("suppliers.detail.fulfillmentAccuracy")}
             value={metrics.fulfillmentAccuracy !== null ? `${metrics.fulfillmentAccuracy.toFixed(1)}%` : "—"}
           />
-          <MetricCard label="Total Orders" value={String(metrics.totalOrders)} />
+          <MetricCard label={t("suppliers.detail.totalOrders")} value={String(metrics.totalOrders)} />
           <MetricCard
-            label="On-Time Delivery"
+            label={t("suppliers.detail.onTimeDelivery")}
             value={metrics.onTimeRate !== null ? `${metrics.onTimeRate.toFixed(1)}%` : "—"}
           />
         </div>
