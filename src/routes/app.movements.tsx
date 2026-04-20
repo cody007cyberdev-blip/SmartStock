@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { Plus, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MovementsTable } from "@/components/movements/MovementsTable";
@@ -13,11 +14,12 @@ import { useMovements, useItems, useLocations } from "@/hooks/useInventoryData";
 import { PermissionGate } from "@/hooks/usePermissions";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { i18n } from "@/i18n";
 import type { StockMovement } from "@/types/inventory";
 
 export const Route = createFileRoute("/app/movements")({
   component: MovementsPage,
-  head: () => ({ meta: [{ title: "Movements — StockMind" }] }),
+  head: () => ({ meta: [{ title: i18n.t("movements.pageTitle") }] }),
   validateSearch: (search: Record<string, unknown>) => ({
     item: typeof search.item === "string" ? search.item : undefined,
   }),
@@ -42,6 +44,7 @@ function applyFilters(movements: StockMovement[], f: MovementFilters): StockMove
 }
 
 function MovementsPage() {
+  const { t } = useTranslation();
   const { item: itemParam } = Route.useSearch();
   const [filters, setFilters] = useState<MovementFilters>(EMPTY_MOVEMENT_FILTERS);
   const [formOpen, setFormOpen] = useState(false);
@@ -49,7 +52,6 @@ function MovementsPage() {
   const { data: items } = useItems();
   const { data: locations } = useLocations();
 
-  // Pre-filter by item query param on mount
   useEffect(() => {
     if (itemParam) {
       setFilters((prev) => ({ ...prev, itemId: itemParam }));
@@ -74,33 +76,33 @@ function MovementsPage() {
   const filtered = useMemo(() => applyFilters(movements, filters), [movements, filters]);
 
   const movementCsvColumns = useMemo<CSVColumn<StockMovement>[]>(() => [
-    { header: "Date", accessor: (m) => new Date(m.createdAt).toLocaleDateString() },
-    { header: "Type", accessor: (m) => m.type },
-    { header: "Item Name", accessor: (m) => itemNameMap.get(m.itemId) ?? "" },
-    { header: "SKU", accessor: (m) => items.find((i) => i.id === m.itemId)?.sku ?? "" },
-    { header: "Quantity", accessor: (m) => m.quantity },
-    { header: "Performed By", accessor: (m) => m.performedBy },
-    { header: "Reference", accessor: (m) => m.reference },
-    { header: "Notes", accessor: (m) => m.notes },
-  ], [itemNameMap, items]);
+    { header: t("movements.csv.headers.date"), accessor: (m) => new Date(m.createdAt).toLocaleDateString() },
+    { header: t("movements.csv.headers.type"), accessor: (m) => m.type },
+    { header: t("movements.csv.headers.itemName"), accessor: (m) => itemNameMap.get(m.itemId) ?? "" },
+    { header: t("movements.csv.headers.sku"), accessor: (m) => items.find((i) => i.id === m.itemId)?.sku ?? "" },
+    { header: t("movements.csv.headers.quantity"), accessor: (m) => m.quantity },
+    { header: t("movements.csv.headers.performedBy"), accessor: (m) => m.performedBy },
+    { header: t("movements.csv.headers.reference"), accessor: (m) => m.reference },
+    { header: t("movements.csv.headers.notes"), accessor: (m) => m.notes },
+  ], [itemNameMap, items, t]);
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Stock movements</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} movements</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t("movements.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("movements.countLabel", { count: filtered.length })}</p>
         </div>
         <div className="flex items-center gap-2">
           <CSVExportButton
             data={filtered}
             columns={movementCsvColumns}
-            filename="stackwise-movements"
+            filename={t("movements.csv.filename")}
           />
           <PermissionGate permission="log_movement">
             <Button onClick={() => setFormOpen(true)} className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white">
               <Plus className="h-4 w-4" />
-              Log Movement
+              {t("movements.log")}
             </Button>
           </PermissionGate>
         </div>
@@ -119,9 +121,9 @@ function MovementsPage() {
       {movements.length === 0 ? (
         <EmptyState
           icon={ArrowUpDown}
-          title="No stock movements recorded"
-          description="Movements track stock changes — receipts, shipments, adjustments, and transfers."
-          actionLabel="Log Movement"
+          title={t("movements.empty.title")}
+          description={t("movements.empty.description")}
+          actionLabel={t("movements.log")}
           onAction={() => setFormOpen(true)}
         />
       ) : (
