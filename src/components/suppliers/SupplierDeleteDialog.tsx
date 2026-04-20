@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -10,7 +11,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import type { Supplier, Item, PurchaseOrder } from "@/types/inventory";
@@ -24,6 +24,7 @@ interface SupplierDeleteDialogProps {
 }
 
 export function SupplierDeleteDialog({ supplier, items, purchaseOrders, onDelete }: SupplierDeleteDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const linkedCount = useMemo(
@@ -42,7 +43,7 @@ export function SupplierDeleteDialog({ supplier, items, purchaseOrders, onDelete
 
   function handleClick() {
     if (hasOpenPOs) {
-      toast.error(`Cannot delete supplier with ${openPOs.length} open purchase order${openPOs.length > 1 ? "s" : ""}.`);
+      toast.error(t("suppliers.delete.blockedByPOs", { count: openPOs.length }));
       return;
     }
     setOpen(true);
@@ -51,28 +52,28 @@ export function SupplierDeleteDialog({ supplier, items, purchaseOrders, onDelete
   function handleConfirm() {
     onDelete(supplier.id);
     setOpen(false);
-    toast.success("Supplier deleted");
+    toast.success(t("suppliers.delete.success"));
   }
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <Button size="sm" variant="destructive" onClick={handleClick}>
         <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-        Delete
+        {t("suppliers.delete.btn")}
       </Button>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete {supplier.name}?</AlertDialogTitle>
+          <AlertDialogTitle>{t("suppliers.delete.title", { name: supplier.name })}</AlertDialogTitle>
           <AlertDialogDescription>
             {linkedCount > 0
-              ? `This supplier is linked to ${linkedCount} item${linkedCount > 1 ? "s" : ""}. Deleting will remove the supplier reference from those items. Continue?`
-              : "This action cannot be undone. The supplier will be permanently removed."}
+              ? t("suppliers.delete.withItems", { count: linkedCount })
+              : t("suppliers.delete.withoutItems")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Delete
+            {t("suppliers.delete.btn")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

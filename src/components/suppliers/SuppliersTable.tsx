@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import {
   Table,
@@ -23,6 +24,7 @@ interface SuppliersTableProps {
 const PER_PAGE = 20;
 
 export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const isMobile = useIsMobile();
@@ -49,10 +51,10 @@ export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableP
 
   const pagination = filtered.length > 0 && (
     <div className="flex items-center justify-between text-sm text-muted-foreground">
-      <span>Showing {start}–{end} of {filtered.length} suppliers</span>
+      <span>{t("suppliers.table.showing", { start, end, total: filtered.length })}</span>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>Previous</Button>
-        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>Next</Button>
+        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>{t("common.previous")}</Button>
+        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>{t("common.next")}</Button>
       </div>
     </div>
   );
@@ -61,11 +63,11 @@ export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableP
     <div className="space-y-3">
       <div className="relative max-w-xs">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search suppliers…" className="h-9 pl-8 text-sm bg-white" value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} />
+        <Input placeholder={t("suppliers.searchPlaceholder")} className="h-9 pl-8 text-sm bg-white" value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} />
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-16 text-center text-sm text-muted-foreground">{search ? "No suppliers match your search" : "No suppliers added yet"}</p>
+        <p className="py-16 text-center text-sm text-muted-foreground">{search ? t("suppliers.table.noMatch") : t("suppliers.table.empty")}</p>
       ) : isMobile ? (
         <>
           <div className="space-y-3">
@@ -75,14 +77,14 @@ export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableP
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium">{s.name}</CardTitle>
                     <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${s.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                      {s.isActive ? "Active" : "Inactive"}
+                      {s.isActive ? t("suppliers.table.active") : t("suppliers.table.inactive")}
                     </span>
                   </div>
                 </CardHeader>
                 <CardContent className="px-4 pb-3 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Contact</span><span>{s.contactName || "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Lead Time</span><span className="font-mono">{s.leadTimeDays}d</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Items</span><span className="font-mono">{itemCountMap.get(s.id) ?? 0}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t("suppliers.table.contact")}</span><span>{s.contactName || "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t("suppliers.table.leadTime")}</span><span className="font-mono">{t("suppliers.detail.days", { count: s.leadTimeDays })}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t("suppliers.table.items")}</span><span className="font-mono">{itemCountMap.get(s.id) ?? 0}</span></div>
                 </CardContent>
               </Card>
             ))}
@@ -95,13 +97,13 @@ export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableP
             <Table>
               <TableHeader className="sticky top-0 bg-card">
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact Person</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead className="w-[100px]">Lead Time</TableHead>
-                  <TableHead className="w-[100px]">Items</TableHead>
-                  <TableHead className="w-[90px]">Status</TableHead>
+                  <TableHead>{t("suppliers.table.name")}</TableHead>
+                  <TableHead>{t("suppliers.table.contact")}</TableHead>
+                  <TableHead>{t("suppliers.table.email")}</TableHead>
+                  <TableHead>{t("suppliers.table.phone")}</TableHead>
+                  <TableHead className="w-[100px]">{t("suppliers.table.leadTime")}</TableHead>
+                  <TableHead className="w-[100px]">{t("suppliers.table.items")}</TableHead>
+                  <TableHead className="w-[90px]">{t("suppliers.table.status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -111,11 +113,11 @@ export function SuppliersTable({ suppliers, items, onRowClick }: SuppliersTableP
                     <TableCell className="text-sm text-muted-foreground">{s.contactName || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{s.email || "—"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{s.phone || "—"}</TableCell>
-                    <TableCell className="text-sm font-mono">{s.leadTimeDays}d</TableCell>
+                    <TableCell className="text-sm font-mono">{t("suppliers.detail.days", { count: s.leadTimeDays })}</TableCell>
                     <TableCell className="text-sm font-mono">{itemCountMap.get(s.id) ?? 0}</TableCell>
                     <TableCell>
                       <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${s.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>
-                        {s.isActive ? "Active" : "Inactive"}
+                        {s.isActive ? t("suppliers.table.active") : t("suppliers.table.inactive")}
                       </span>
                     </TableCell>
                   </TableRow>

@@ -1,5 +1,7 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import { FileText } from "lucide-react";
 import {
   Table,
@@ -27,6 +29,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function SupplierOrderHistory({ purchaseOrders, supplierId }: SupplierOrderHistoryProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.resolvedLanguage === "pt" ? ptBR : enUS;
+
   const filtered = useMemo(() => {
     return purchaseOrders
       .filter((po) => po.supplierId === supplierId)
@@ -40,13 +45,13 @@ export function SupplierOrderHistory({ purchaseOrders, supplierId }: SupplierOrd
       <div className="flex items-center gap-2 mb-3">
         <FileText className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-sm font-semibold text-foreground">
-          Order History ({filtered.length})
+          {t("suppliers.detail.orderHistory", { count: filtered.length })}
         </h3>
       </div>
 
       {filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4">
-          No orders placed with this supplier.
+          {t("suppliers.detail.noOrders")}
         </p>
       ) : (
         <div className="space-y-2">
@@ -54,12 +59,12 @@ export function SupplierOrderHistory({ purchaseOrders, supplierId }: SupplierOrd
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs">PO #</TableHead>
-                  <TableHead className="text-xs">Status</TableHead>
-                  <TableHead className="text-xs w-[60px]">Items</TableHead>
-                  <TableHead className="text-xs">Total</TableHead>
-                  <TableHead className="text-xs">Expected</TableHead>
-                  <TableHead className="text-xs">Created</TableHead>
+                  <TableHead className="text-xs">{t("suppliers.detail.poNumber")}</TableHead>
+                  <TableHead className="text-xs">{t("common.status")}</TableHead>
+                  <TableHead className="text-xs w-[60px]">{t("suppliers.table.items")}</TableHead>
+                  <TableHead className="text-xs">{t("suppliers.detail.total")}</TableHead>
+                  <TableHead className="text-xs">{t("suppliers.detail.expected")}</TableHead>
+                  <TableHead className="text-xs">{t("suppliers.detail.created")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -76,10 +81,10 @@ export function SupplierOrderHistory({ purchaseOrders, supplierId }: SupplierOrd
                       ${po.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {po.expectedDelivery ? format(new Date(po.expectedDelivery), "MMM d, yyyy") : "—"}
+                      {po.expectedDelivery ? format(new Date(po.expectedDelivery), "PP", { locale: dateLocale }) : "—"}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {format(new Date(po.createdAt), "MMM d, yyyy")}
+                      {format(new Date(po.createdAt), "PP", { locale: dateLocale })}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -89,7 +94,7 @@ export function SupplierOrderHistory({ purchaseOrders, supplierId }: SupplierOrd
 
           {filtered.length > MAX_ORDERS && (
             <p className="text-xs text-muted-foreground">
-              Showing {MAX_ORDERS} of {filtered.length} orders
+              {t("suppliers.detail.showingCount", { shown: MAX_ORDERS, total: filtered.length })}
             </p>
           )}
         </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo, Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import {
   PackageCheck,
   PackageMinus,
@@ -27,12 +28,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MovementType } from "@/types/inventory";
 import type { StockMovement } from "@/types/inventory";
 import { formatDistanceToNow, format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 
-const TYPE_META: Record<MovementType, { icon: typeof PackageCheck; label: string }> = {
-  [MovementType.Received]: { icon: PackageCheck, label: "Received" },
-  [MovementType.Shipped]: { icon: PackageMinus, label: "Shipped" },
-  [MovementType.Adjusted]: { icon: PenLine, label: "Adjusted" },
-  [MovementType.Transferred]: { icon: ArrowLeftRight, label: "Transferred" },
+const TYPE_ICON: Record<MovementType, typeof PackageCheck> = {
+  [MovementType.Received]: PackageCheck,
+  [MovementType.Shipped]: PackageMinus,
+  [MovementType.Adjusted]: PenLine,
+  [MovementType.Transferred]: ArrowLeftRight,
 };
 
 function directionOf(type: MovementType, qty: number): "in" | "out" {
@@ -50,9 +52,18 @@ interface MovementsTableProps {
 const PER_PAGE = 25;
 
 export function MovementsTable({ movements, itemNameMap, locationNameMap }: MovementsTableProps) {
+  const { t, i18n } = useTranslation();
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const dateLocale = i18n.resolvedLanguage === "pt" ? ptBR : enUS;
+
+  const typeLabel = (type: MovementType): string => {
+    if (type === MovementType.Received) return t("movements.types.received");
+    if (type === MovementType.Shipped) return t("movements.types.shipped");
+    if (type === MovementType.Adjusted) return t("movements.types.adjusted");
+    return t("movements.types.transferred");
+  };
 
   const sorted = useMemo(
     () => [...movements].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -66,15 +77,15 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
   const end = Math.min((safePage + 1) * PER_PAGE, sorted.length);
 
   if (sorted.length === 0) {
-    return <p className="py-16 text-center text-sm text-muted-foreground">No stock movements recorded</p>;
+    return <p className="py-16 text-center text-sm text-muted-foreground">{t("movements.table.empty")}</p>;
   }
 
   const pagination = (
     <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-      <span>Showing {start}–{end} of {sorted.length} movements</span>
+      <span>{t("movements.table.showing", { start, end, total: sorted.length })}</span>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>Previous</Button>
-        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>Next</Button>
+        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>{t("common.previous")}</Button>
+        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>{t("common.next")}</Button>
       </div>
     </div>
   );
@@ -84,8 +95,7 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
       <div>
         <div className="space-y-3">
           {paged.map((m) => {
-            const meta = TYPE_META[m.type];
-            const Icon = meta.icon;
+            const Icon = TYPE_ICON[m.type];
             const dir = directionOf(m.type, m.quantity);
             const absQty = Math.abs(m.quantity);
             return (
@@ -94,7 +104,7 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium flex items-center gap-1.5">
                       <Icon className="h-4 w-4 text-muted-foreground" />
-                      {meta.label}
+                      {typeLabel(m.type)}
                     </CardTitle>
                     <span className={`font-mono text-sm font-medium ${dir === "in" ? "text-emerald-600" : "text-red-500"}`}>
                       {dir === "in" ? "+" : "−"}{absQty}
@@ -103,23 +113,23 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
                 </CardHeader>
                 <CardContent className="px-4 pb-3 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Item</span>
-                    <span className="truncate ml-2 font-medium">{itemNameMap.get(m.itemId) ?? "Unknown"}</span>
+                    <span className="text-muted-foreground">{t("movements.table.item")}</span>
+                    <span className="truncate ml-2 font-medium">{itemNameMap.get(m.itemId) ?? t("common.unknown")}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">By</span>
+                    <span className="text-muted-foreground">{t("movements.table.performedBy")}</span>
                     <span>{m.performedBy}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Time</span>
-                    <span>{formatDistanceToNow(new Date(m.createdAt), { addSuffix: true })}</span>
+                    <span className="text-muted-foreground">{t("movements.table.time")}</span>
+                    <span>{formatDistanceToNow(new Date(m.createdAt), { addSuffix: true, locale: dateLocale })}</span>
                   </div>
                   {expandedId === m.id && (
                     <div className="pt-2 border-t border-border mt-2 space-y-1">
-                      {m.reference && <div><span className="text-muted-foreground">Ref:</span> {m.reference}</div>}
-                      {m.notes && <div><span className="text-muted-foreground">Note:</span> {m.notes}</div>}
+                      {m.reference && <div><span className="text-muted-foreground">{t("common.reference")}:</span> {m.reference}</div>}
+                      {m.notes && <div><span className="text-muted-foreground">{t("common.notes")}:</span> {m.notes}</div>}
                       <a href={`/app/catalog?item=${m.itemId}`} className="inline-flex items-center gap-1 text-primary hover:underline text-xs" onClick={(e) => e.stopPropagation()}>
-                        <ExternalLink className="h-3 w-3" /> View Item
+                        <ExternalLink className="h-3 w-3" /> {t("common.viewItem")}
                       </a>
                     </div>
                   )}
@@ -141,22 +151,22 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
             <TableHeader className="sticky top-0 bg-card">
               <TableRow>
                 <TableHead className="w-[36px]" />
-                <TableHead className="w-[140px]">Type</TableHead>
-                <TableHead>Item</TableHead>
-                <TableHead className="w-[100px]">Quantity</TableHead>
-                <TableHead className="w-[80px]">Direction</TableHead>
-                <TableHead>Performed By</TableHead>
-                <TableHead>Reference</TableHead>
-                <TableHead className="w-[140px]">Time</TableHead>
+                <TableHead className="w-[140px]">{t("movements.table.type")}</TableHead>
+                <TableHead>{t("movements.table.item")}</TableHead>
+                <TableHead className="w-[100px]">{t("movements.table.quantity")}</TableHead>
+                <TableHead className="w-[80px]">{t("movements.table.direction")}</TableHead>
+                <TableHead>{t("movements.table.performedBy")}</TableHead>
+                <TableHead>{t("movements.table.reference")}</TableHead>
+                <TableHead className="w-[140px]">{t("movements.table.time")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paged.map((m) => {
-                const meta = TYPE_META[m.type];
-                const Icon = meta.icon;
+                const Icon = TYPE_ICON[m.type];
                 const dir = directionOf(m.type, m.quantity);
                 const absQty = Math.abs(m.quantity);
                 const isExpanded = expandedId === m.id;
+                const dirLabel = t(`movements.direction.${dir}`);
 
                 return (
                   <Fragment key={m.id}>
@@ -165,23 +175,23 @@ export function MovementsTable({ movements, itemNameMap, locationNameMap }: Move
                         <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
                       </TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center gap-1.5 text-sm"><Icon className="h-4 w-4 text-muted-foreground" />{meta.label}</span>
+                        <span className="inline-flex items-center gap-1.5 text-sm"><Icon className="h-4 w-4 text-muted-foreground" />{typeLabel(m.type)}</span>
                       </TableCell>
-                      <TableCell className="font-medium">{itemNameMap.get(m.itemId) ?? <span className="italic text-muted-foreground/60 line-through">[Item Deleted]</span>}</TableCell>
+                      <TableCell className="font-medium">{itemNameMap.get(m.itemId) ?? <span className="italic text-muted-foreground/60 line-through">{t("movements.table.itemDeleted")}</span>}</TableCell>
                       <TableCell>
                         <span className={`font-mono text-sm font-medium ${dir === "in" ? "text-emerald-600" : "text-red-500"}`}>{dir === "in" ? "+" : "−"}{absQty}</span>
                       </TableCell>
                       <TableCell>
-                        <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${dir === "in" ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-500"}`}>{dir}</span>
+                        <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${dir === "in" ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-500"}`}>{dirLabel}</span>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{m.performedBy}</TableCell>
                       <TableCell className="max-w-[180px] truncate text-sm text-muted-foreground">{m.reference || "—"}</TableCell>
                       <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="cursor-default text-sm text-muted-foreground">{formatDistanceToNow(new Date(m.createdAt), { addSuffix: true })}</span>
+                            <span className="cursor-default text-sm text-muted-foreground">{formatDistanceToNow(new Date(m.createdAt), { addSuffix: true, locale: dateLocale })}</span>
                           </TooltipTrigger>
-                          <TooltipContent>{format(new Date(m.createdAt), "PPpp")}</TooltipContent>
+                          <TooltipContent>{format(new Date(m.createdAt), "PPpp", { locale: dateLocale })}</TooltipContent>
                         </Tooltip>
                       </TableCell>
                     </TableRow>
@@ -217,18 +227,19 @@ interface MovementDetailProps {
 }
 
 function MovementDetail({ movement, itemName, fromLocation, toLocation }: MovementDetailProps) {
+  const { t } = useTranslation();
   const isTransfer = movement.type === MovementType.Transferred;
   return (
     <div className="space-y-2 text-sm">
       {(movement.notes || movement.reference) && (
-        <div><span className="font-medium text-foreground">Note: </span><span className="text-muted-foreground">{movement.notes || movement.reference}</span></div>
+        <div><span className="font-medium text-foreground">{t("common.notes")}: </span><span className="text-muted-foreground">{movement.notes || movement.reference}</span></div>
       )}
       {isTransfer && (fromLocation || toLocation) && (
-        <div><span className="font-medium text-foreground">Transfer: </span><span className="text-muted-foreground">{fromLocation ?? "—"} → {toLocation ?? "—"}</span></div>
+        <div><span className="font-medium text-foreground">{t("movements.table.transfer")}: </span><span className="text-muted-foreground">{fromLocation ?? "—"} → {toLocation ?? "—"}</span></div>
       )}
       <div>
         <a href={`/app/catalog?item=${movement.itemId}`} className="inline-flex items-center gap-1 text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
-          <ExternalLink className="h-3 w-3" />View {itemName}
+          <ExternalLink className="h-3 w-3" />{t("common.viewItem")} {itemName}
         </a>
       </div>
     </div>

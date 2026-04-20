@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { MovementType } from "@/types/inventory";
 import type { StockMovement } from "@/types/inventory";
 
@@ -7,6 +8,7 @@ interface MovementStatsProps {
 }
 
 export function MovementStats({ movements }: MovementStatsProps) {
+  const { t } = useTranslation();
   const stats = useMemo(() => {
     let received = 0;
     let shipped = 0;
@@ -20,10 +22,10 @@ export function MovementStats({ movements }: MovementStatsProps) {
   }, [movements]);
 
   const pills = [
-    { label: "Total", value: stats.total },
-    { label: "Received", value: stats.received },
-    { label: "Shipped", value: stats.shipped },
-    { label: "Adjustments", value: stats.adjusted },
+    { label: t("movements.stats.total"), value: stats.total },
+    { label: t("movements.stats.received"), value: stats.received },
+    { label: t("movements.stats.shipped"), value: stats.shipped },
+    { label: t("movements.stats.adjusted"), value: stats.adjusted },
   ];
 
   return (
