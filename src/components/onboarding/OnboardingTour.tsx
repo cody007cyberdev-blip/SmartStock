@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TourStep } from "@/hooks/useOnboarding";
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function OnboardingTour({ steps, currentStep, isActive, onNext, onBack, onSkip, onComplete }: Props) {
+  const { t } = useTranslation();
   const [pos, setPos] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -98,10 +100,10 @@ export function OnboardingTour({ steps, currentStep, isActive, onNext, onBack, o
           </div>
           <div className="flex gap-2">
             {!isFirst && (
-              <Button size="sm" variant="ghost" onClick={onBack}>Back</Button>
+              <Button size="sm" variant="ghost" onClick={onBack}>{t("common.back")}</Button>
             )}
             <Button size="sm" onClick={handleNext}>
-              {isLast ? "Done" : "Next"}
+              {isLast ? t("common.done") : t("common.next")}
             </Button>
           </div>
         </div>
