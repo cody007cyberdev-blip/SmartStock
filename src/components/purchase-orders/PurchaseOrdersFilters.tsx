@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +19,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import type { POFilters } from "./po-filter-types";
 import { EMPTY_PO_FILTERS, isFiltersActive, activeFilterCount } from "./po-filter-types";
 
-const STATUS_OPTIONS = [
-  { value: OrderStatus.Draft, label: "Draft" },
-  { value: OrderStatus.Submitted, label: "Submitted" },
-  { value: OrderStatus.Partial, label: "Partially Received" },
-  { value: OrderStatus.Received, label: "Fully Received" },
-  { value: OrderStatus.Cancelled, label: "Cancelled" },
+const STATUS_KEYS: { value: OrderStatus; key: "draft" | "submitted" | "partial" | "received" | "cancelled" }[] = [
+  { value: OrderStatus.Draft, key: "draft" },
+  { value: OrderStatus.Submitted, key: "submitted" },
+  { value: OrderStatus.Partial, key: "partial" },
+  { value: OrderStatus.Received, key: "received" },
+  { value: OrderStatus.Cancelled, key: "cancelled" },
 ];
 
 interface PurchaseOrdersFiltersProps {
@@ -33,6 +34,7 @@ interface PurchaseOrdersFiltersProps {
 }
 
 function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersProps) {
+  const { t } = useTranslation();
   const toggleStatus = (s: OrderStatus) => {
     const next = filters.statuses.includes(s)
       ? filters.statuses.filter((v) => v !== s)
@@ -42,34 +44,32 @@ function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersP
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Status multi-select */}
       <div>
-        <Label className="mb-1.5 block text-xs text-muted-foreground">Status</Label>
+        <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.status")}</Label>
         <div className="flex flex-wrap gap-2">
-          {STATUS_OPTIONS.map((o) => (
+          {STATUS_KEYS.map((o) => (
             <label key={o.value} className="flex items-center gap-1.5 text-sm">
               <Checkbox
                 checked={filters.statuses.includes(o.value)}
                 onCheckedChange={() => toggleStatus(o.value)}
               />
-              {o.label}
+              {t(`purchaseOrders.status.${o.key}` as const)}
             </label>
           ))}
         </div>
       </div>
 
-      {/* Supplier select */}
       <div>
-        <Label className="mb-1.5 block text-xs text-muted-foreground">Supplier</Label>
+        <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.supplier")}</Label>
         <Select
           value={filters.supplierId ?? "__all__"}
           onValueChange={(v) => onChange({ ...filters, supplierId: v === "__all__" ? null : v })}
         >
           <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="All suppliers" />
+            <SelectValue placeholder={t("purchaseOrders.filters.allSuppliers")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__">All suppliers</SelectItem>
+            <SelectItem value="__all__">{t("purchaseOrders.filters.allSuppliers")}</SelectItem>
             {suppliers.map((s) => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
@@ -77,10 +77,9 @@ function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersP
         </Select>
       </div>
 
-      {/* Date range */}
       <div className="flex gap-2">
         <div className="flex-1">
-          <Label className="mb-1.5 block text-xs text-muted-foreground">From</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.from")}</Label>
           <Input
             type="date"
             className="h-8 text-xs"
@@ -89,7 +88,7 @@ function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersP
           />
         </div>
         <div className="flex-1">
-          <Label className="mb-1.5 block text-xs text-muted-foreground">To</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.to")}</Label>
           <Input
             type="date"
             className="h-8 text-xs"
@@ -101,7 +100,7 @@ function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersP
 
       {isFiltersActive(filters) && (
         <Button variant="ghost" size="sm" className="w-fit gap-1 text-xs" onClick={() => onChange(EMPTY_PO_FILTERS)}>
-          <X className="h-3 w-3" />Clear Filters
+          <X className="h-3 w-3" />{t("purchaseOrders.filters.clear")}
         </Button>
       )}
     </div>
@@ -109,6 +108,7 @@ function FilterControls({ filters, onChange, suppliers }: PurchaseOrdersFiltersP
 }
 
 export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const count = activeFilterCount(props.filters);
 
@@ -118,13 +118,13 @@ export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
         <SheetTrigger asChild>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Filter className="h-4 w-4" />
-            Filters
+            {t("purchaseOrders.filters.filtersBtn")}
             {count > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">{count}</Badge>}
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-[300px]">
           <SheetHeader>
-            <SheetTitle>Filters</SheetTitle>
+            <SheetTitle>{t("common.filters")}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
             <FilterControls {...props} />
@@ -137,11 +137,10 @@ export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Status */}
         <div>
-          <Label className="mb-1.5 block text-xs text-muted-foreground">Status</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.status")}</Label>
           <div className="flex flex-wrap gap-2">
-            {STATUS_OPTIONS.map((o) => (
+            {STATUS_KEYS.map((o) => (
               <label key={o.value} className="flex items-center gap-1.5 text-sm">
                 <Checkbox
                   checked={props.filters.statuses.includes(o.value)}
@@ -152,24 +151,23 @@ export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
                     props.onChange({ ...props.filters, statuses: next });
                   }}
                 />
-                {o.label}
+                {t(`purchaseOrders.status.${o.key}` as const)}
               </label>
             ))}
           </div>
         </div>
 
-        {/* Supplier */}
         <div>
-          <Label className="mb-1.5 block text-xs text-muted-foreground">Supplier</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.supplier")}</Label>
           <Select
             value={props.filters.supplierId ?? "__all__"}
             onValueChange={(v) => props.onChange({ ...props.filters, supplierId: v === "__all__" ? null : v })}
           >
             <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="All suppliers" />
+              <SelectValue placeholder={t("purchaseOrders.filters.allSuppliers")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all__">All suppliers</SelectItem>
+              <SelectItem value="__all__">{t("purchaseOrders.filters.allSuppliers")}</SelectItem>
               {props.suppliers.map((s) => (
                 <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
               ))}
@@ -177,9 +175,8 @@ export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
           </Select>
         </div>
 
-        {/* Date range */}
         <div>
-          <Label className="mb-1.5 block text-xs text-muted-foreground">Date Range</Label>
+          <Label className="mb-1.5 block text-xs text-muted-foreground">{t("purchaseOrders.filters.dateRange")}</Label>
           <div className="flex gap-1">
             <Input
               type="date"
@@ -196,11 +193,10 @@ export function PurchaseOrdersFilters(props: PurchaseOrdersFiltersProps) {
           </div>
         </div>
 
-        {/* Clear */}
         <div className="flex items-end">
           {isFiltersActive(props.filters) && (
             <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={() => props.onChange(EMPTY_PO_FILTERS)}>
-              <X className="h-3 w-3" />Clear Filters
+              <X className="h-3 w-3" />{t("purchaseOrders.filters.clear")}
             </Button>
           )}
         </div>

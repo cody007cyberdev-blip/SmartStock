@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Send, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ interface POStatusActionsProps {
 }
 
 export function POStatusActions({ purchaseOrder }: POStatusActionsProps) {
+  const { t } = useTranslation();
   const { can } = usePermissions();
   const canManage = can("create_po");
   const updatePO = useUpdatePurchaseOrder();
@@ -40,7 +42,7 @@ export function POStatusActions({ purchaseOrder }: POStatusActionsProps) {
         updates: { status: OrderStatus.Submitted, updatedAt: new Date().toISOString() },
       },
       {
-        onSuccess: () => toast.success(`${purchaseOrder.orderNumber} submitted`),
+        onSuccess: () => toast.success(t("purchaseOrders.actions.submitted", { number: purchaseOrder.orderNumber })),
       },
     );
   }
@@ -53,7 +55,7 @@ export function POStatusActions({ purchaseOrder }: POStatusActionsProps) {
       },
       {
         onSuccess: () => {
-          toast.success(`${purchaseOrder.orderNumber} cancelled`);
+          toast.success(t("purchaseOrders.actions.cancelled", { number: purchaseOrder.orderNumber }));
           setCancelOpen(false);
         },
       },
@@ -66,7 +68,7 @@ export function POStatusActions({ purchaseOrder }: POStatusActionsProps) {
         {status === OrderStatus.Draft && (
           <Button size="sm" onClick={handleSubmit} className="gap-1.5">
             <Send className="h-3.5 w-3.5" />
-            Submit
+            {t("purchaseOrders.actions.submit")}
           </Button>
         )}
         <Button
@@ -76,25 +78,25 @@ export function POStatusActions({ purchaseOrder }: POStatusActionsProps) {
           onClick={() => setCancelOpen(true)}
         >
           <Ban className="h-3.5 w-3.5" />
-          Cancel PO
+          {t("purchaseOrders.actions.cancelPO")}
         </Button>
       </div>
 
       <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel {purchaseOrder.orderNumber}?</AlertDialogTitle>
+            <AlertDialogTitle>{t("purchaseOrders.actions.cancelTitle", { number: purchaseOrder.orderNumber })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will mark the purchase order as cancelled. This action cannot be undone.
+              {t("purchaseOrders.actions.cancelDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Order</AlertDialogCancel>
+            <AlertDialogCancel>{t("purchaseOrders.actions.keepOrder")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancel}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Confirm Cancel
+              {t("purchaseOrders.actions.confirmCancel")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

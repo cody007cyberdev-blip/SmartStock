@@ -1,6 +1,8 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { format, formatDistanceToNow } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import { Pencil, ExternalLink, Trash2, PackageCheck, Clock, Check, Printer } from "lucide-react";
 import {
   Sheet,
@@ -37,12 +39,12 @@ import { POStatusActions } from "./POStatusActions";
 import { cn } from "@/lib/utils";
 import { POPrintView } from "./POPrintView";
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  [OrderStatus.Draft]: "Draft",
-  [OrderStatus.Submitted]: "Submitted",
-  [OrderStatus.Partial]: "Partially Received",
-  [OrderStatus.Received]: "Fully Received",
-  [OrderStatus.Cancelled]: "Cancelled",
+const STATUS_KEY: Record<OrderStatus, "draft" | "submitted" | "partial" | "received" | "cancelled"> = {
+  [OrderStatus.Draft]: "draft",
+  [OrderStatus.Submitted]: "submitted",
+  [OrderStatus.Partial]: "partial",
+  [OrderStatus.Received]: "received",
+  [OrderStatus.Cancelled]: "cancelled",
 };
 
 const STATUS_CLASS: Record<OrderStatus, string> = {
@@ -80,6 +82,9 @@ export function PurchaseOrderDetailSheet({
   onReceive,
   movements = [],
 }: PurchaseOrderDetailSheetProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith("pt") ? ptBR : enUS;
+
   const supplierMap = useMemo(
     () => new Map(suppliers.map((s) => [s.id, s])),
     [suppliers],
@@ -89,7 +94,6 @@ export function PurchaseOrderDetailSheet({
     [items],
   );
 
-  // Filter movements by PO reference (must be before early return)
   const poMovements = useMemo(
     () =>
       purchaseOrder
@@ -112,19 +116,20 @@ export function PurchaseOrderDetailSheet({
     purchaseOrder.status === OrderStatus.Partial ||
     purchaseOrder.status === OrderStatus.Received;
 
+  const statusLabel = t(`purchaseOrders.status.${STATUS_KEY[purchaseOrder.status]}` as const);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-[600px]">
         <SheetHeader>
           <SheetTitle>{purchaseOrder.orderNumber}</SheetTitle>
-          <SheetDescription>Purchase order details</SheetDescription>
+          <SheetDescription>{t("purchaseOrders.detail.title")}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-5">
-          {/* Header info */}
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="outline" className={STATUS_CLASS[purchaseOrder.status]}>
-              {STATUS_LABEL[purchaseOrder.status]}
+              {statusLabel}
             </Badge>
             {isDraft && canEdit && (
               <Button
@@ -134,7 +139,7 @@ export function PurchaseOrderDetailSheet({
                 onClick={() => onEdit(purchaseOrder)}
               >
                 <Pencil className="h-3.5 w-3.5" />
-                Edit
+                {t("common.edit")}
               </Button>
             )}
             {isDraft && isAdmin && (
@@ -142,23 +147,23 @@ export function PurchaseOrderDetailSheet({
                 <AlertDialogTrigger asChild>
                   <Button size="sm" variant="outline" className="gap-1.5 text-destructive hover:text-destructive">
                     <Trash2 className="h-3.5 w-3.5" />
-                    Delete
+                    {t("common.delete")}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {purchaseOrder.orderNumber}?</AlertDialogTitle>
+                    <AlertDialogTitle>{t("purchaseOrders.detail.deleteTitle", { number: purchaseOrder.orderNumber })}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Delete this draft purchase order? This cannot be undone.
+                      {t("purchaseOrders.detail.deleteDesc")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       onClick={() => onDelete(purchaseOrder.id)}
                     >
-                      Confirm Delete
+                      {t("purchaseOrders.detail.confirmDelete")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -172,13 +177,13 @@ export function PurchaseOrderDetailSheet({
                 onClick={() => onReceive(purchaseOrder)}
               >
                 <PackageCheck className="h-3.5 w-3.5" />
-                Receive Shipment
+                {t("purchaseOrders.detail.receiveShipment")}
               </Button>
             )}
             {purchaseOrder.status === OrderStatus.Received && (
               <Badge className="bg-stock-healthy/15 text-stock-healthy border-stock-healthy/20 gap-1">
                 <Check className="h-3 w-3" />
-                Fully Received
+                {t("purchaseOrders.detail.fullyReceived")}
               </Badge>
             )}
             <Button
@@ -188,13 +193,12 @@ export function PurchaseOrderDetailSheet({
               onClick={() => window.print()}
             >
               <Printer className="h-3.5 w-3.5" />
-              Print
+              {t("common.print")}
             </Button>
           </div>
 
-          {/* Supplier link */}
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">Supplier</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("purchaseOrders.detail.supplier")}</p>
             {supplier ? (
               <Link
                 to="/app/suppliers"
@@ -205,23 +209,22 @@ export function PurchaseOrderDetailSheet({
                 <ExternalLink className="h-3 w-3" />
               </Link>
             ) : (
-              <p className="text-sm text-foreground">Unknown</p>
+              <p className="text-sm text-foreground">{t("common.unknown")}</p>
             )}
           </div>
 
-          {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Created</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("purchaseOrders.detail.created")}</p>
               <p className="text-sm text-foreground">
-                {format(new Date(purchaseOrder.createdAt), "MMM d, yyyy")}
+                {format(new Date(purchaseOrder.createdAt), "MMM d, yyyy", { locale: dateLocale })}
               </p>
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Expected Delivery</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("purchaseOrders.detail.expected")}</p>
               <p className="text-sm text-foreground">
                 {purchaseOrder.expectedDelivery
-                  ? format(new Date(purchaseOrder.expectedDelivery), "MMM d, yyyy")
+                  ? format(new Date(purchaseOrder.expectedDelivery), "MMM d, yyyy", { locale: dateLocale })
                   : "—"}
               </p>
             </div>
@@ -229,28 +232,27 @@ export function PurchaseOrderDetailSheet({
 
           {purchaseOrder.notes && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Notes</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("purchaseOrders.detail.notes")}</p>
               <p className="text-sm text-foreground">{purchaseOrder.notes}</p>
             </div>
           )}
 
           <Separator />
 
-          {/* Line items */}
           <div>
             <p className="mb-2 text-sm font-medium text-foreground">
-              Line Items ({purchaseOrder.items.length})
+              {t("purchaseOrders.detail.lineItems", { count: purchaseOrder.items.length })}
             </p>
             <div className="overflow-x-auto rounded-md border border-border bg-white">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead className="w-[60px] text-right">Ordered</TableHead>
-                    <TableHead className="w-[70px] text-right">Received</TableHead>
-                    <TableHead className="w-[70px] text-right">Remaining</TableHead>
-                    <TableHead className="w-[100px]">Progress</TableHead>
-                    <TableHead className="w-[80px] text-right">Total</TableHead>
+                    <TableHead>{t("purchaseOrders.lineItems.item")}</TableHead>
+                    <TableHead className="w-[60px] text-right">{t("purchaseOrders.detail.ordered")}</TableHead>
+                    <TableHead className="w-[70px] text-right">{t("purchaseOrders.detail.received")}</TableHead>
+                    <TableHead className="w-[70px] text-right">{t("purchaseOrders.detail.remaining")}</TableHead>
+                    <TableHead className="w-[100px]">{t("purchaseOrders.detail.progress")}</TableHead>
+                    <TableHead className="w-[80px] text-right">{t("purchaseOrders.detail.total")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -269,7 +271,7 @@ export function PurchaseOrderDetailSheet({
                     return (
                       <TableRow key={li.id}>
                         <TableCell>
-                          <p className={`text-sm font-medium ${!item ? "italic text-muted-foreground/60 line-through" : ""}`}>{item?.name ?? "Deleted Item"}</p>
+                          <p className={`text-sm font-medium ${!item ? "italic text-muted-foreground/60 line-through" : ""}`}>{item?.name ?? t("purchaseOrders.detail.itemDeleted")}</p>
                           <p className="font-mono text-xs text-muted-foreground">{item?.sku ?? "—"}</p>
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">
@@ -305,10 +307,9 @@ export function PurchaseOrderDetailSheet({
             </div>
           </div>
 
-          {/* Total */}
           <div className="flex justify-end">
             <span className="text-sm font-medium text-foreground">
-              Total:{" "}
+              {t("purchaseOrders.detail.total")}:{" "}
               <span className="font-mono text-base">
                 ${purchaseOrder.totalCost.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
@@ -320,12 +321,11 @@ export function PurchaseOrderDetailSheet({
 
           <Separator />
 
-          {/* Receiving History */}
           {showHistory && (
             <div>
-              <p className="mb-2 text-sm font-medium text-foreground">Receiving History</p>
+              <p className="mb-2 text-sm font-medium text-foreground">{t("purchaseOrders.detail.receivingHistory")}</p>
               {poMovements.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No shipments received yet.</p>
+                <p className="text-sm text-muted-foreground">{t("purchaseOrders.detail.noShipments")}</p>
               ) : (
                 <div className="space-y-3">
                   {poMovements.map((m) => {
@@ -336,14 +336,14 @@ export function PurchaseOrderDetailSheet({
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 text-sm">
                             <span className={`font-medium ${!item ? "italic text-muted-foreground/60 line-through" : "text-foreground"}`}>
-                              {item?.name ?? "[Item Deleted]"}
+                              {item?.name ?? t("purchaseOrders.detail.itemDeletedShort")}
                             </span>
                             <span className="font-mono text-xs text-muted-foreground">
                               +{m.quantity}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {m.performedBy} · {formatDistanceToNow(new Date(m.createdAt), { addSuffix: true })}
+                            {m.performedBy} · {formatDistanceToNow(new Date(m.createdAt), { addSuffix: true, locale: dateLocale })}
                           </p>
                           {m.notes && (
                             <p className="mt-0.5 text-xs text-muted-foreground italic">{m.notes}</p>
@@ -359,7 +359,6 @@ export function PurchaseOrderDetailSheet({
 
           <Separator />
 
-          {/* Status actions */}
           <POStatusActions purchaseOrder={purchaseOrder} />
         </div>
 

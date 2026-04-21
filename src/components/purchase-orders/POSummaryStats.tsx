@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { OrderStatus } from "@/types/inventory";
 import type { PurchaseOrder } from "@/types/inventory";
 
@@ -7,6 +8,7 @@ interface POSummaryStatsProps {
 }
 
 export function POSummaryStats({ purchaseOrders }: POSummaryStatsProps) {
+  const { t } = useTranslation();
   const stats = useMemo(() => {
     let draft = 0;
     let awaiting = 0;
@@ -20,10 +22,10 @@ export function POSummaryStats({ purchaseOrders }: POSummaryStatsProps) {
   }, [purchaseOrders]);
 
   const pills = [
-    { label: "Total", value: stats.total },
-    { label: "Draft", value: stats.draft },
-    { label: "Awaiting Delivery", value: stats.awaiting },
-    { label: "Completed", value: stats.completed },
+    { label: t("purchaseOrders.summary.total"), value: stats.total },
+    { label: t("purchaseOrders.summary.draft"), value: stats.draft },
+    { label: t("purchaseOrders.summary.awaiting"), value: stats.awaiting },
+    { label: t("purchaseOrders.summary.completed"), value: stats.completed },
   ];
 
   return (

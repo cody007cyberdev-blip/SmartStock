@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import {
   Table,
   TableBody,
@@ -15,12 +17,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { OrderStatus } from "@/types/inventory";
 import type { PurchaseOrder, Supplier } from "@/types/inventory";
 
-const STATUS_STYLE: Record<OrderStatus, { label: string; variant: "secondary" | "default" | "destructive" | "outline" }> = {
-  [OrderStatus.Draft]: { label: "Draft", variant: "secondary" },
-  [OrderStatus.Submitted]: { label: "Submitted", variant: "default" },
-  [OrderStatus.Partial]: { label: "Partially Received", variant: "outline" },
-  [OrderStatus.Received]: { label: "Fully Received", variant: "default" },
-  [OrderStatus.Cancelled]: { label: "Cancelled", variant: "destructive" },
+const STATUS_KEY: Record<OrderStatus, "draft" | "submitted" | "partial" | "received" | "cancelled"> = {
+  [OrderStatus.Draft]: "draft",
+  [OrderStatus.Submitted]: "submitted",
+  [OrderStatus.Partial]: "partial",
+  [OrderStatus.Received]: "received",
+  [OrderStatus.Cancelled]: "cancelled",
+};
+
+const STATUS_VARIANT: Record<OrderStatus, "secondary" | "default" | "destructive" | "outline"> = {
+  [OrderStatus.Draft]: "secondary",
+  [OrderStatus.Submitted]: "default",
+  [OrderStatus.Partial]: "outline",
+  [OrderStatus.Received]: "default",
+  [OrderStatus.Cancelled]: "destructive",
 };
 
 const STATUS_CLASS: Record<OrderStatus, string> = {
@@ -40,6 +50,8 @@ interface PurchaseOrdersTableProps {
 const PER_PAGE = 20;
 
 export function PurchaseOrdersTable({ purchaseOrders, suppliers, onRowClick }: PurchaseOrdersTableProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith("pt") ? ptBR : enUS;
   const [page, setPage] = useState(0);
   const isMobile = useIsMobile();
 
@@ -52,16 +64,18 @@ export function PurchaseOrdersTable({ purchaseOrders, suppliers, onRowClick }: P
   const start = safePage * PER_PAGE + 1;
   const end = Math.min((safePage + 1) * PER_PAGE, sorted.length);
 
+  const statusLabel = (s: OrderStatus) => t(`purchaseOrders.status.${STATUS_KEY[s]}` as const);
+
   if (sorted.length === 0) {
-    return <p className="py-16 text-center text-sm text-muted-foreground">No purchase orders yet</p>;
+    return <p className="py-16 text-center text-sm text-muted-foreground">{t("purchaseOrders.table.empty")}</p>;
   }
 
   const pagination = sorted.length > PER_PAGE && (
     <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-      <span>Showing {start}–{end} of {sorted.length} orders</span>
+      <span>{t("purchaseOrders.table.showing", { start, end, total: sorted.length })}</span>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>Previous</Button>
-        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>Next</Button>
+        <Button variant="outline" size="sm" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>{t("common.previous")}</Button>
+        <Button variant="outline" size="sm" disabled={safePage >= totalPages - 1} onClick={() => setPage(safePage + 1)}>{t("common.next")}</Button>
       </div>
     </div>
   );
@@ -70,25 +84,22 @@ export function PurchaseOrdersTable({ purchaseOrders, suppliers, onRowClick }: P
     return (
       <div>
         <div className="space-y-3">
-          {paged.map((po) => {
-            const statusMeta = STATUS_STYLE[po.status];
-            return (
-              <Card key={po.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onRowClick(po)}>
-                <CardHeader className="pb-2 pt-3 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-mono font-medium">{po.orderNumber}</CardTitle>
-                    <Badge variant={statusMeta.variant} className={STATUS_CLASS[po.status]}>{statusMeta.label}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-4 pb-3 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Supplier</span><span className="truncate ml-2">{supplierMap.get(po.supplierId) ?? "Unknown"}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Items</span><span className="font-mono">{po.items.length}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-mono font-medium">${po.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Created</span><span>{format(new Date(po.createdAt), "MMM d, yyyy")}</span></div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {paged.map((po) => (
+            <Card key={po.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onRowClick(po)}>
+              <CardHeader className="pb-2 pt-3 px-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-mono font-medium">{po.orderNumber}</CardTitle>
+                  <Badge variant={STATUS_VARIANT[po.status]} className={STATUS_CLASS[po.status]}>{statusLabel(po.status)}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="px-4 pb-3 space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("purchaseOrders.table.supplier")}</span><span className="truncate ml-2">{supplierMap.get(po.supplierId) ?? t("purchaseOrders.table.unknown")}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("purchaseOrders.table.items")}</span><span className="font-mono">{po.items.length}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("purchaseOrders.summary.total")}</span><span className="font-mono font-medium">${po.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{t("purchaseOrders.table.created")}</span><span>{format(new Date(po.createdAt), "MMM d, yyyy", { locale: dateLocale })}</span></div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
         {pagination}
       </div>
@@ -101,30 +112,27 @@ export function PurchaseOrdersTable({ purchaseOrders, suppliers, onRowClick }: P
         <Table>
           <TableHeader className="sticky top-0 bg-card">
             <TableRow>
-              <TableHead className="w-[130px]">PO Number</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead className="w-[160px]">Status</TableHead>
-              <TableHead className="w-[80px] text-center">Items</TableHead>
-              <TableHead className="w-[120px] text-right">Total Cost</TableHead>
-              <TableHead className="w-[130px]">Expected</TableHead>
-              <TableHead className="w-[130px]">Created</TableHead>
+              <TableHead className="w-[130px]">{t("purchaseOrders.table.poNumber")}</TableHead>
+              <TableHead>{t("purchaseOrders.table.supplier")}</TableHead>
+              <TableHead className="w-[160px]">{t("purchaseOrders.table.status")}</TableHead>
+              <TableHead className="w-[80px] text-center">{t("purchaseOrders.table.items")}</TableHead>
+              <TableHead className="w-[120px] text-right">{t("purchaseOrders.table.totalCost")}</TableHead>
+              <TableHead className="w-[130px]">{t("purchaseOrders.table.expected")}</TableHead>
+              <TableHead className="w-[130px]">{t("purchaseOrders.table.created")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paged.map((po) => {
-              const statusMeta = STATUS_STYLE[po.status];
-              return (
-                <TableRow key={po.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onRowClick(po)}>
-                  <TableCell className="font-mono text-sm font-medium">{po.orderNumber}</TableCell>
-                  <TableCell>{supplierMap.get(po.supplierId) ?? "Unknown"}</TableCell>
-                  <TableCell><Badge variant={statusMeta.variant} className={STATUS_CLASS[po.status]}>{statusMeta.label}</Badge></TableCell>
-                  <TableCell className="text-center font-mono text-sm">{po.items.length}</TableCell>
-                  <TableCell className="text-right font-mono text-sm font-medium">${po.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{po.expectedDelivery ? format(new Date(po.expectedDelivery), "MMM d, yyyy") : "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{format(new Date(po.createdAt), "MMM d, yyyy")}</TableCell>
-                </TableRow>
-              );
-            })}
+            {paged.map((po) => (
+              <TableRow key={po.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onRowClick(po)}>
+                <TableCell className="font-mono text-sm font-medium">{po.orderNumber}</TableCell>
+                <TableCell>{supplierMap.get(po.supplierId) ?? t("purchaseOrders.table.unknown")}</TableCell>
+                <TableCell><Badge variant={STATUS_VARIANT[po.status]} className={STATUS_CLASS[po.status]}>{statusLabel(po.status)}</Badge></TableCell>
+                <TableCell className="text-center font-mono text-sm">{po.items.length}</TableCell>
+                <TableCell className="text-right font-mono text-sm font-medium">${po.totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{po.expectedDelivery ? format(new Date(po.expectedDelivery), "MMM d, yyyy", { locale: dateLocale }) : "—"}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{format(new Date(po.createdAt), "MMM d, yyyy", { locale: dateLocale })}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
