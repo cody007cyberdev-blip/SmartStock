@@ -1,35 +1,33 @@
+import { useTranslation } from "react-i18next";
 import { Check, Circle, X } from "lucide-react";
 import { RequestStatus } from "@/types/inventory";
 import { cn } from "@/lib/utils";
 
-const STEPS = [
-  { key: "submitted", label: "Submitted" },
-  { key: "review", label: "Under Review" },
-  { key: "decision", label: "Decision" },
-  { key: "fulfilled", label: "Fulfilled" },
-] as const;
+type StepKey = "submitted" | "review" | "decision" | "fulfilled";
+
+const STEPS: StepKey[] = ["submitted", "review", "decision", "fulfilled"];
 
 function resolveStep(status: RequestStatus): {
   activeIdx: number;
-  decisionLabel: string;
+  decisionKey: "decision" | "approved" | "partial" | "declined";
   isTerminal: boolean;
   isNegative: boolean;
 } {
   switch (status) {
     case RequestStatus.Pending:
-      return { activeIdx: 1, decisionLabel: "Decision", isTerminal: false, isNegative: false };
+      return { activeIdx: 1, decisionKey: "decision", isTerminal: false, isNegative: false };
     case RequestStatus.Approved:
-      return { activeIdx: 2, decisionLabel: "Approved", isTerminal: false, isNegative: false };
+      return { activeIdx: 2, decisionKey: "approved", isTerminal: false, isNegative: false };
     case RequestStatus.PartiallyFulfilled:
-      return { activeIdx: 2, decisionLabel: "Partial", isTerminal: false, isNegative: false };
+      return { activeIdx: 2, decisionKey: "partial", isTerminal: false, isNegative: false };
     case RequestStatus.Fulfilled:
-      return { activeIdx: 3, decisionLabel: "Approved", isTerminal: true, isNegative: false };
+      return { activeIdx: 3, decisionKey: "approved", isTerminal: true, isNegative: false };
     case RequestStatus.Declined:
-      return { activeIdx: 2, decisionLabel: "Declined", isTerminal: true, isNegative: true };
+      return { activeIdx: 2, decisionKey: "declined", isTerminal: true, isNegative: true };
     case RequestStatus.Cancelled:
-      return { activeIdx: 1, decisionLabel: "Decision", isTerminal: true, isNegative: true };
+      return { activeIdx: 1, decisionKey: "decision", isTerminal: true, isNegative: true };
     default:
-      return { activeIdx: 0, decisionLabel: "Decision", isTerminal: false, isNegative: false };
+      return { activeIdx: 0, decisionKey: "decision", isTerminal: false, isNegative: false };
   }
 }
 
@@ -38,10 +36,11 @@ interface StatusStepperProps {
 }
 
 export function StatusStepper({ status }: StatusStepperProps) {
-  const { activeIdx, decisionLabel, isTerminal, isNegative } = resolveStep(status);
+  const { t } = useTranslation();
+  const { activeIdx, decisionKey, isTerminal, isNegative } = resolveStep(status);
 
   const labels = STEPS.map((s) =>
-    s.key === "decision" ? decisionLabel : s.label,
+    s === "decision" ? t(`requests.stepper.${decisionKey}` as const) : t(`requests.stepper.${s}` as const),
   );
 
   return (
@@ -52,7 +51,6 @@ export function StatusStepper({ status }: StatusStepperProps) {
         const isFuture = idx > activeIdx;
         const isLast = idx === labels.length - 1;
 
-        // Skip fulfilled step for declined/cancelled
         if (isLast && isTerminal && isNegative && idx > activeIdx) return null;
 
         return (

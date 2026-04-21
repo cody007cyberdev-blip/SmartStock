@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -36,21 +37,13 @@ import type { PurchaseOrder, Supplier, PurchaseOrderItem, Item } from "@/types/i
 import { LineItemsEditor, type LineItemRow } from "./LineItemsEditor";
 import { LowStockSuggestions } from "./LowStockSuggestions";
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  [OrderStatus.Draft]: "Draft",
-  [OrderStatus.Submitted]: "Submitted",
-  [OrderStatus.Partial]: "Partially Received",
-  [OrderStatus.Received]: "Fully Received",
-  [OrderStatus.Cancelled]: "Cancelled",
+const STATUS_KEY: Record<OrderStatus, "draft" | "submitted" | "partial" | "received" | "cancelled"> = {
+  [OrderStatus.Draft]: "draft",
+  [OrderStatus.Submitted]: "submitted",
+  [OrderStatus.Partial]: "partial",
+  [OrderStatus.Received]: "received",
+  [OrderStatus.Cancelled]: "cancelled",
 };
-
-const schema = z.object({
-  supplierId: z.string().min(1, "Supplier is required"),
-  expectedDelivery: z.string().min(1, "Expected delivery date is required"),
-  notes: z.string(),
-});
-
-type FormValues = z.infer<typeof schema>;
 
 function generatePONumber(): string {
   const year = new Date().getFullYear();
@@ -73,11 +66,20 @@ export function PurchaseOrderFormSheet({
   suppliers,
   items,
 }: PurchaseOrderFormSheetProps) {
+  const { t } = useTranslation();
   const isEdit = !!purchaseOrder;
   const createPO = useCreatePurchaseOrder();
   const updatePO = useUpdatePurchaseOrder();
   const [lineItems, setLineItems] = useState<LineItemRow[]>([]);
   const [lineError, setLineError] = useState("");
+
+  const schema = z.object({
+    supplierId: z.string().min(1, t("purchaseOrders.form.supplierRequired")),
+    expectedDelivery: z.string().min(1, t("purchaseOrders.form.expectedRequired")),
+    notes: z.string(),
+  });
+
+  type FormValues = z.infer<typeof schema>;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -110,11 +112,11 @@ export function PurchaseOrderFormSheet({
 
   function onSubmit(values: FormValues) {
     if (lineItems.length === 0) {
-      setLineError("At least one line item is required");
+      setLineError(t("purchaseOrders.form.lineRequired"));
       return;
     }
     if (lineItems.some((r) => !r.itemId)) {
-      setLineError("All line items must have an item selected");
+      setLineError(t("purchaseOrders.form.lineItemRequired"));
       return;
     }
     setLineError("");
@@ -145,8 +147,8 @@ export function PurchaseOrderFormSheet({
           },
         },
         {
-          onSuccess: () => { toast.success(`${purchaseOrder.orderNumber} updated`); onOpenChange(false); },
-          onError: (e) => toast.error(e.message || "Failed to update purchase order."),
+          onSuccess: () => { toast.success(t("purchaseOrders.form.updated", { number: purchaseOrder.orderNumber })); onOpenChange(false); },
+          onError: (e) => toast.error(e.message || t("purchaseOrders.form.updateFailed")),
         },
       );
     } else {
@@ -167,8 +169,8 @@ export function PurchaseOrderFormSheet({
         updatedAt: now,
       };
       createPO.mutate(newPO, {
-        onSuccess: () => { toast.success(`${orderNumber} created`); onOpenChange(false); },
-        onError: (e) => toast.error(e.message || "Failed to create purchase order."),
+        onSuccess: () => { toast.success(t("purchaseOrders.form.created", { number: orderNumber })); onOpenChange(false); },
+        onError: (e) => toast.error(e.message || t("purchaseOrders.form.createFailed")),
       });
     }
   }
@@ -178,17 +180,17 @@ export function PurchaseOrderFormSheet({
       <SheetContent className="w-full overflow-y-auto sm:max-w-[600px]">
         <SheetHeader>
           <SheetTitle>
-            {isEdit ? `Edit ${purchaseOrder?.orderNumber}` : "New Purchase Order"}
+            {isEdit ? t("purchaseOrders.form.titleEdit", { number: purchaseOrder?.orderNumber }) : t("purchaseOrders.form.titleNew")}
           </SheetTitle>
           <SheetDescription>
-            {isEdit ? "Update purchase order details." : "Create a new purchase order for a supplier."}
+            {isEdit ? t("purchaseOrders.form.descEdit") : t("purchaseOrders.form.descNew")}
           </SheetDescription>
         </SheetHeader>
 
         {isEdit && purchaseOrder && (
           <div className="mt-4 flex items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">Status</span>
-            <Badge variant="outline">{STATUS_LABEL[purchaseOrder.status]}</Badge>
+            <span className="text-sm font-medium text-muted-foreground">{t("purchaseOrders.form.statusLabel")}</span>
+            <Badge variant="outline">{t(`purchaseOrders.status.${STATUS_KEY[purchaseOrder.status]}` as const)}</Badge>
           </div>
         )}
 
@@ -199,11 +201,11 @@ export function PurchaseOrderFormSheet({
               name="supplierId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Supplier *</FormLabel>
+                  <FormLabel>{t("purchaseOrders.form.supplierLabel")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a supplier" />
+                        <SelectValue placeholder={t("purchaseOrders.form.supplierPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -222,7 +224,7 @@ export function PurchaseOrderFormSheet({
               name="expectedDelivery"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expected Delivery *</FormLabel>
+                  <FormLabel>{t("purchaseOrders.form.expectedLabel")}</FormLabel>
                   <FormControl><Input type="date" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -234,8 +236,8 @@ export function PurchaseOrderFormSheet({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl><Textarea {...field} rows={2} placeholder="Additional notes…" /></FormControl>
+                  <FormLabel>{t("purchaseOrders.form.notesLabel")}</FormLabel>
+                  <FormControl><Textarea {...field} rows={2} placeholder={t("purchaseOrders.form.notesPlaceholder")} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -260,8 +262,8 @@ export function PurchaseOrderFormSheet({
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit">{isEdit ? "Save Changes" : "Create PO"}</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+              <Button type="submit">{isEdit ? t("purchaseOrders.form.submitEdit") : t("purchaseOrders.form.submitNew")}</Button>
             </div>
           </form>
         </Form>
