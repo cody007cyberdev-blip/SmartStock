@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Brain, Hand, Layers } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,33 +12,31 @@ import { toast } from "sonner";
 
 const OPTIONS: Array<{
   value: ReplenishmentMode;
-  label: string;
   icon: typeof Hand;
 }> = [
-  { value: "manual", label: "Manual", icon: Hand },
-  { value: "mixed", label: "Mixed", icon: Layers },
-  { value: "ai", label: "AI / ML", icon: Brain },
+  { value: "manual", icon: Hand },
+  { value: "mixed", icon: Layers },
+  { value: "ai", icon: Brain },
 ];
 
 export function ReplenishmentModeSettings() {
+  const { t } = useTranslation();
   const [mode, setMode] = useReplenishmentMode();
 
   const handleChange = (next: string) => {
     setMode(next as ReplenishmentMode);
-    toast.success(`Replenishment mode set to ${next.toUpperCase()}`);
+    toast.success(t("settings.replenishment.changed", { mode: t(`settings.replenishment.modes.${next}` as const) }));
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Replenishment mode</CardTitle>
-        <CardDescription>
-          Choose how reorder points and quantities are calculated across your catalog.
-        </CardDescription>
+        <CardTitle>{t("settings.replenishment.title")}</CardTitle>
+        <CardDescription>{t("settings.replenishment.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <RadioGroup value={mode} onValueChange={handleChange} className="space-y-3">
-          {OPTIONS.map(({ value, label, icon: Icon }) => {
+          {OPTIONS.map(({ value, icon: Icon }) => {
             const active = mode === value;
             return (
               <Label
@@ -59,7 +58,7 @@ export function ReplenishmentModeSettings() {
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">{label}</p>
+                    <p className="text-sm font-medium text-foreground">{t(`settings.replenishment.modes.${value}` as const)}</p>
                     <p className="text-xs text-muted-foreground">
                       {REPLENISHMENT_MODE_DESCRIPTIONS[value]}
                     </p>

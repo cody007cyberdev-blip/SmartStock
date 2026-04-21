@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Trash2, ArrowUp, ArrowDown, X, Check, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { useDemo } from "@/hooks/useDemo";
@@ -18,7 +19,8 @@ const MAX_FIELDS = 20;
 const FIELD_TYPES = ["text", "number", "boolean", "select"] as const;
 
 export function CustomFieldManager() {
-  const { demoStore, bumpVersion, version } = useDemo();
+  const { t } = useTranslation();
+  const { demoStore, bumpVersion } = useDemo();
   const fields = demoStore?.getCustomFieldDefs() ?? [];
 
   const [adding, setAdding] = useState(false);
@@ -31,7 +33,7 @@ export function CustomFieldManager() {
   useEffect(() => { if (adding) nameRef.current?.focus(); }, [adding]);
 
   const handleAdd = () => {
-    if (!newName.trim()) { toast.error("Field name is required"); return; }
+    if (!newName.trim()) { toast.error(t("settings.customFields.nameRequired")); return; }
     if (!demoStore) return;
     const def: CustomFieldDefinition = {
       id: crypto.randomUUID(),
@@ -43,7 +45,7 @@ export function CustomFieldManager() {
     };
     demoStore.addCustomFieldDef(def);
     bumpVersion();
-    toast.success("Custom field added");
+    toast.success(t("settings.customFields.added"));
     setNewName(""); setNewType("text"); setNewOptions(""); setAdding(false);
   };
 
@@ -51,7 +53,7 @@ export function CustomFieldManager() {
     if (!deleteTarget || !demoStore) return;
     demoStore.deleteCustomFieldDef(deleteTarget.id);
     bumpVersion();
-    toast.success("Custom field removed");
+    toast.success(t("settings.customFields.removed"));
     setDeleteTarget(null);
   };
 
@@ -66,7 +68,15 @@ export function CustomFieldManager() {
   };
 
   if (fields.length === 0 && !adding) {
-    return <EmptyState icon={ListChecks} title="No custom fields defined" description="Custom fields add extra data to your items, like serial numbers or conditions." actionLabel="Add Field" onAction={() => setAdding(true)} />;
+    return (
+      <EmptyState
+        icon={ListChecks}
+        title={t("settings.customFields.empty.title")}
+        description={t("settings.customFields.empty.description")}
+        actionLabel={t("settings.customFields.empty.action")}
+        onAction={() => setAdding(true)}
+      />
+    );
   }
 
   const atLimit = fields.length >= MAX_FIELDS;
@@ -74,17 +84,17 @@ export function CustomFieldManager() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{fields.length}/{MAX_FIELDS} fields</p>
+        <p className="text-sm text-muted-foreground">{t("settings.customFields.countLabel", { count: fields.length, max: MAX_FIELDS })}</p>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
                 <Button size="sm" variant="outline" disabled={atLimit} onClick={() => setAdding(true)}>
-                  <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Field
+                  <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("settings.customFields.addBtn")}
                 </Button>
               </span>
             </TooltipTrigger>
-            {atLimit && <TooltipContent>Maximum of {MAX_FIELDS} custom fields reached</TooltipContent>}
+            {atLimit && <TooltipContent>{t("settings.customFields.maxReached", { max: MAX_FIELDS })}</TooltipContent>}
           </Tooltip>
         </TooltipProvider>
       </div>
@@ -92,20 +102,20 @@ export function CustomFieldManager() {
       {adding && (
         <div className="rounded-lg border border-border p-3 space-y-2">
           <div className="flex items-center gap-2">
-            <Input ref={nameRef} placeholder="Field name" value={newName} onChange={(e) => setNewName(e.target.value)} className="h-8 text-sm flex-1" />
+            <Input ref={nameRef} placeholder={t("settings.customFields.namePh")} value={newName} onChange={(e) => setNewName(e.target.value)} className="h-8 text-sm flex-1" />
             <Select value={newType} onValueChange={(v) => setNewType(v as CustomFieldDefinition["fieldType"])}>
               <SelectTrigger className="h-8 w-[120px] text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {FIELD_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                {FIELD_TYPES.map((typ) => <SelectItem key={typ} value={typ}>{t(`settings.customFields.types.${typ}` as const)}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           {newType === "select" && (
-            <Input placeholder="Options (comma-separated)" value={newOptions} onChange={(e) => setNewOptions(e.target.value)} className="h-8 text-sm" />
+            <Input placeholder={t("settings.customFields.optionsPh")} value={newOptions} onChange={(e) => setNewOptions(e.target.value)} className="h-8 text-sm" />
           )}
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleAdd}><Check className="mr-1.5 h-3.5 w-3.5" />Save</Button>
-            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}><X className="mr-1.5 h-3.5 w-3.5" />Cancel</Button>
+            <Button size="sm" onClick={handleAdd}><Check className="mr-1.5 h-3.5 w-3.5" />{t("common.save")}</Button>
+            <Button size="sm" variant="ghost" onClick={() => setAdding(false)}><X className="mr-1.5 h-3.5 w-3.5" />{t("common.cancel")}</Button>
           </div>
         </div>
       )}
@@ -115,7 +125,7 @@ export function CustomFieldManager() {
           <div key={f.id} className="flex items-center justify-between gap-2 p-3">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-sm font-medium truncate max-w-[200px]">{f.name}</span>
-              <Badge variant="outline" className="text-xs shrink-0">{f.fieldType}</Badge>
+              <Badge variant="outline" className="text-xs shrink-0">{t(`settings.customFields.types.${f.fieldType}` as const)}</Badge>
               {f.fieldType === "select" && f.options.length > 0 && (
                 <span className="text-xs text-muted-foreground truncate">{f.options.join(", ")}</span>
               )}
@@ -132,12 +142,12 @@ export function CustomFieldManager() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove "{deleteTarget?.name}"?</AlertDialogTitle>
-            <AlertDialogDescription>Existing item values for this field will be orphaned. This cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{t("settings.customFields.removeTitle", { name: deleteTarget?.name ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("settings.customFields.removeDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t("settings.customFields.remove")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
