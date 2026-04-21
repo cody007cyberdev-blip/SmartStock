@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import { X, CheckCheck, Bell, Settings2, Share2 } from "lucide-react";
 import {
   Sheet,
@@ -15,7 +17,7 @@ import { useNotifications, useMarkAsRead, useMarkAllAsRead, useDismissNotificati
 import { getNotificationIcon } from "./notification-icons";
 import { buildWhatsAppShareUrl, isShareable } from "@/lib/whatsapp-share";
 import { cn } from "@/lib/utils";
-import type { Notification, NotificationType } from "@/types/inventory";
+import type { Notification } from "@/types/inventory";
 
 type FilterTab = "all" | "unread" | "stock" | "po" | "requests";
 
@@ -34,6 +36,8 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: NotificationCenterProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith("pt") ? ptBR : enUS;
   const [tab, setTab] = useState<FilterTab>("all");
   const { data: notifications } = useNotifications();
   const markAsRead = useMarkAsRead();
@@ -53,13 +57,12 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
   };
 
   return (
-    <>
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col">
         <SheetHeader className="border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-base">
-              Notifications
+              {t("notifications.title")}
               {unreadCount > 0 && (
                 <span className="ml-2 rounded-full bg-destructive px-2 py-0.5 font-mono text-xs text-destructive-foreground">
                   {unreadCount}
@@ -70,10 +73,10 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
               {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" className="text-xs" onClick={markAllAsRead}>
                   <CheckCheck className="mr-1 h-3.5 w-3.5" />
-                  Mark All as Read
+                  {t("notifications.markAllAsRead")}
                 </Button>
               )}
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenPrefs?.()} aria-label="Notification settings">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenPrefs?.()} aria-label={t("notifications.settings")}>
                 <Settings2 className="h-4 w-4" />
               </Button>
             </div>
@@ -83,11 +86,11 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
         <div className="border-b border-border px-4 py-2">
           <Tabs value={tab} onValueChange={(v) => setTab(v as FilterTab)}>
             <TabsList className="h-8 w-full">
-              <TabsTrigger value="all" className="text-xs flex-1">All</TabsTrigger>
-              <TabsTrigger value="unread" className="text-xs flex-1">Unread</TabsTrigger>
-              <TabsTrigger value="stock" className="text-xs flex-1">Stock</TabsTrigger>
-              <TabsTrigger value="po" className="text-xs flex-1">PO</TabsTrigger>
-              <TabsTrigger value="requests" className="text-xs flex-1">Requests</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs flex-1">{t("notifications.tabs.all")}</TabsTrigger>
+              <TabsTrigger value="unread" className="text-xs flex-1">{t("notifications.tabs.unread")}</TabsTrigger>
+              <TabsTrigger value="stock" className="text-xs flex-1">{t("notifications.tabs.stock")}</TabsTrigger>
+              <TabsTrigger value="po" className="text-xs flex-1">{t("notifications.tabs.po")}</TabsTrigger>
+              <TabsTrigger value="requests" className="text-xs flex-1">{t("notifications.tabs.requests")}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -96,7 +99,7 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
               <Bell className="h-8 w-8" />
-              <p className="text-sm">No notifications</p>
+              <p className="text-sm">{t("notifications.empty")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
@@ -106,6 +109,9 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
                   notification={n}
                   onClick={() => handleClick(n)}
                   onDismiss={() => dismiss(n.id)}
+                  shareLabel={t("notifications.actions.shareWhatsApp")}
+                  dismissLabel={t("notifications.actions.dismiss")}
+                  whenLabel={(d: Date) => formatDistanceToNow(d, { addSuffix: true, locale: dateLocale })}
                 />
               ))}
             </div>
@@ -113,7 +119,6 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
         </ScrollArea>
       </SheetContent>
     </Sheet>
-    </>
   );
 }
 
@@ -121,10 +126,16 @@ function NotificationItem({
   notification: n,
   onClick,
   onDismiss,
+  shareLabel,
+  dismissLabel,
+  whenLabel,
 }: {
   notification: Notification;
   onClick: () => void;
   onDismiss: () => void;
+  shareLabel: string;
+  dismissLabel: string;
+  whenLabel: (d: Date) => string;
 }) {
   const shareable = isShareable(n.type);
   return (
@@ -148,7 +159,7 @@ function NotificationItem({
         <p className="text-sm font-medium leading-tight">{n.title}</p>
         <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.message}</p>
         <p className="mt-1 text-[10px] text-muted-foreground">
-          {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+          {whenLabel(new Date(n.createdAt))}
         </p>
       </div>
 
@@ -160,8 +171,8 @@ function NotificationItem({
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
             className="rounded p-1 text-[oklch(0.55_0.17_155)] opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
-            aria-label="Share via WhatsApp"
-            title="Share via WhatsApp"
+            aria-label={shareLabel}
+            title={shareLabel}
           >
             <Share2 className="h-3.5 w-3.5" />
           </a>
@@ -170,7 +181,7 @@ function NotificationItem({
           type="button"
           className="rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
           onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-          aria-label="Dismiss notification"
+          aria-label={dismissLabel}
         >
           <X className="h-3.5 w-3.5 text-muted-foreground" />
         </button>

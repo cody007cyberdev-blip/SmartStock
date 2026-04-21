@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Item } from "@/types/inventory";
@@ -12,6 +13,7 @@ interface LowStockSuggestionsProps {
 }
 
 export function LowStockSuggestions({ items, supplierId, lineItems, onAdd }: LowStockSuggestionsProps) {
+  const { t } = useTranslation();
   const suggestions = useMemo(() => {
     if (!supplierId) return [];
     const alreadyAdded = new Set(lineItems.map((r) => r.itemId));
@@ -39,7 +41,7 @@ export function LowStockSuggestions({ items, supplierId, lineItems, onAdd }: Low
   return (
     <div className="rounded-md border border-amber-accent/30 bg-amber-accent/5 p-3">
       <p className="mb-2 text-xs font-medium text-amber-accent">
-        Low-stock items from this supplier
+        {t("purchaseOrders.suggestions.title")}
       </p>
       <div className="space-y-1.5">
         {suggestions.map((item) => (
@@ -53,7 +55,7 @@ export function LowStockSuggestions({ items, supplierId, lineItems, onAdd }: Low
                 {item.sku}
               </span>
               <span className="ml-2 text-xs text-muted-foreground">
-                Stock: {item.currentStock} / Reorder: {item.reorderPoint}
+                {t("purchaseOrders.suggestions.stock", { current: item.currentStock, reorder: item.reorderPoint })}
               </span>
             </div>
             <Button
@@ -64,7 +66,7 @@ export function LowStockSuggestions({ items, supplierId, lineItems, onAdd }: Low
               onClick={() => handleAdd(item)}
             >
               <Plus className="h-3 w-3" />
-              Add
+              {t("purchaseOrders.suggestions.add")}
             </Button>
           </div>
         ))}

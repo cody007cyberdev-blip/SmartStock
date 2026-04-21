@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/app/purchase-orders")({
 });
 
 function PurchaseOrdersPage() {
+  const { t } = useTranslation();
   const { po: poParam } = Route.useSearch();
   const { data: purchaseOrders } = usePurchaseOrders();
   const { data: suppliers } = useSuppliers();
@@ -59,7 +61,6 @@ function PurchaseOrdersPage() {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [receivePO, setReceivePO] = useState<PurchaseOrder | null>(null);
 
-  // Open detail from URL param
   useEffect(() => {
     if (poParam && purchaseOrders.length > 0) {
       const match = purchaseOrders.find((p) => p.id === poParam);
@@ -84,7 +85,6 @@ function PurchaseOrdersPage() {
     });
   }, [purchaseOrders, filters]);
 
-  // Keep detailPO in sync with latest data
   const currentDetailPO = useMemo(() => {
     if (!detailPO) return null;
     return purchaseOrders.find((po) => po.id === detailPO.id) ?? detailPO;
@@ -110,13 +110,13 @@ function PurchaseOrdersPage() {
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Purchase orders</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} orders</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t("purchaseOrders.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("purchaseOrders.countLabel", { count: filtered.length })}</p>
         </div>
         {canManagePOs && (
           <Button size="sm" onClick={openCreate}>
             <Plus className="mr-1.5 h-4 w-4" />
-            New PO
+            {t("purchaseOrders.newPO")}
           </Button>
         )}
       </div>
@@ -129,9 +129,9 @@ function PurchaseOrdersPage() {
       {purchaseOrders.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
-          title="No purchase orders created"
-          description="Create purchase orders to track inventory procurement from your suppliers."
-          actionLabel={canManagePOs ? "Create PO" : undefined}
+          title={t("purchaseOrders.empty.title")}
+          description={t("purchaseOrders.empty.description")}
+          actionLabel={canManagePOs ? t("purchaseOrders.empty.action") : undefined}
           onAction={canManagePOs ? openCreate : undefined}
         />
       ) : (
@@ -158,7 +158,7 @@ function PurchaseOrdersPage() {
             onSuccess: () => {
               setDetailOpen(false);
               setDetailPO(null);
-              toast.success("Purchase order deleted");
+              toast.success(t("purchaseOrders.detail.deleted"));
             },
           });
         }}
@@ -178,7 +178,6 @@ function PurchaseOrdersPage() {
             const now = new Date().toISOString();
             const po = receivePO!;
 
-            // 1. Create stock movements for each received line
             for (const line of receivedLines) {
               createMovement.mutate({
                 id: crypto.randomUUID(),
@@ -188,12 +187,11 @@ function PurchaseOrdersPage() {
                 fromLocationId: null,
                 toLocationId: null,
                 reference: po.orderNumber,
-                notes: notes || `Received via ${po.orderNumber}`,
+                notes: notes || t("purchaseOrders.receive.autoNote", { number: po.orderNumber }),
                 performedBy: "demo-user",
                 createdAt: now,
               });
 
-              // 2. Update item currentStock
               const item = catalogItems.find((i) => i.id === line.itemId);
               if (item) {
                 updateItem.mutate({
@@ -203,7 +201,6 @@ function PurchaseOrdersPage() {
               }
             }
 
-            // 3. Update PO line items received quantities
             const updatedItems = po.items.map((li) => {
               const received = receivedLines.find((r) => r.lineItemId === li.id);
               if (received) {
@@ -212,7 +209,6 @@ function PurchaseOrdersPage() {
               return li;
             });
 
-            // 4. Determine new PO status
             const allFullyReceived = updatedItems.every(
               (li) => li.quantityReceived >= li.quantityOrdered,
             );
@@ -225,7 +221,7 @@ function PurchaseOrdersPage() {
 
             const totalQty = receivedLines.reduce((sum, l) => sum + l.qty, 0);
             toast.success(
-              `Received ${totalQty} items across ${receivedLines.length} line items`,
+              t("purchaseOrders.receive.success", { qty: totalQty, lines: receivedLines.length }),
             );
             setReceiveOpen(false);
           }}

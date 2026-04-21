@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,13 +7,13 @@ import { RequestStatus } from "@/types/inventory";
 import type { RequestFilters } from "./request-filter-types";
 import { EMPTY_REQUEST_FILTERS } from "./request-filter-types";
 
-const STATUSES: { value: RequestStatus; label: string }[] = [
-  { value: RequestStatus.Pending, label: "Pending" },
-  { value: RequestStatus.Approved, label: "Approved" },
-  { value: RequestStatus.PartiallyFulfilled, label: "Partial" },
-  { value: RequestStatus.Fulfilled, label: "Fulfilled" },
-  { value: RequestStatus.Declined, label: "Declined" },
-  { value: RequestStatus.Cancelled, label: "Cancelled" },
+const STATUS_KEYS: { value: RequestStatus; key: "pending" | "approved" | "partial" | "fulfilled" | "declined" | "cancelled" }[] = [
+  { value: RequestStatus.Pending, key: "pending" },
+  { value: RequestStatus.Approved, key: "approved" },
+  { value: RequestStatus.PartiallyFulfilled, key: "partial" },
+  { value: RequestStatus.Fulfilled, key: "fulfilled" },
+  { value: RequestStatus.Declined, key: "declined" },
+  { value: RequestStatus.Cancelled, key: "cancelled" },
 ];
 
 interface RequestsFiltersProps {
@@ -21,6 +22,7 @@ interface RequestsFiltersProps {
 }
 
 export function RequestsFilters({ filters, onChange }: RequestsFiltersProps) {
+  const { t } = useTranslation();
   const hasFilters =
     filters.statuses.length > 0 || filters.requestor || filters.dateFrom || filters.dateTo;
 
@@ -33,18 +35,18 @@ export function RequestsFilters({ filters, onChange }: RequestsFiltersProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {STATUSES.map((s) => (
+      {STATUS_KEYS.map((s) => (
         <Badge
           key={s.value}
           variant={filters.statuses.includes(s.value) ? "default" : "outline"}
           className="cursor-pointer select-none"
           onClick={() => toggleStatus(s.value)}
         >
-          {s.label}
+          {t(`requests.status.${s.key}` as const)}
         </Badge>
       ))}
       <Input
-        placeholder="Requestor..."
+        placeholder={t("requests.filters.requestor")}
         value={filters.requestor}
         onChange={(e) => onChange({ ...filters, requestor: e.target.value })}
         className="h-8 w-32"
@@ -54,14 +56,14 @@ export function RequestsFilters({ filters, onChange }: RequestsFiltersProps) {
         value={filters.dateFrom}
         onChange={(e) => onChange({ ...filters, dateFrom: e.target.value })}
         className="h-8 w-36"
-        aria-label="From date"
+        aria-label={t("requests.filters.fromDate")}
       />
       <Input
         type="date"
         value={filters.dateTo}
         onChange={(e) => onChange({ ...filters, dateTo: e.target.value })}
         className="h-8 w-36"
-        aria-label="To date"
+        aria-label={t("requests.filters.toDate")}
       />
       {hasFilters && (
         <Button
@@ -71,7 +73,7 @@ export function RequestsFilters({ filters, onChange }: RequestsFiltersProps) {
           onClick={() => onChange(EMPTY_REQUEST_FILTERS)}
         >
           <X className="h-3 w-3" />
-          Clear
+          {t("requests.filters.clear")}
         </Button>
       )}
     </div>

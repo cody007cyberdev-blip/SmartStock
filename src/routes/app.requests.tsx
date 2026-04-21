@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -54,6 +55,7 @@ function applyFilters(requests: InventoryRequest[], filters: RequestFilters): In
 }
 
 function RequestsPage() {
+  const { t } = useTranslation();
   const { data: catalogItems } = useItems();
   const { data: requests } = useRequests();
   const { role } = useRole();
@@ -69,7 +71,6 @@ function RequestsPage() {
   const [detailRequest, setDetailRequest] = useState<InventoryRequest | null>(null);
   const [cancelTarget, setCancelTarget] = useState<InventoryRequest | null>(null);
 
-  // Open detail from URL param on load
   useEffect(() => {
     if (requestParam && requests.length > 0 && !detailRequest) {
       const found = requests.find((r) => r.id === requestParam);
@@ -131,7 +132,7 @@ function RequestsPage() {
       updatedAt: new Date().toISOString(),
     });
     bumpVersion();
-    toast.success(`${cancelTarget.requestNumber} cancelled`);
+    toast.success(t("requests.cancel.success", { number: cancelTarget.requestNumber }));
     setCancelTarget(null);
   }
 
@@ -139,12 +140,12 @@ function RequestsPage() {
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Inventory Requests</h1>
-          <p className="text-sm text-muted-foreground">{requests.length} requests</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t("requests.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("requests.countLabel", { count: requests.length })}</p>
         </div>
         <Button size="sm" onClick={() => setFormOpen(true)}>
           <Plus className="mr-1.5 h-4 w-4" />
-          New Request
+          {t("requests.newRequest")}
         </Button>
       </div>
 
@@ -152,17 +153,17 @@ function RequestsPage() {
       {requests.length === 0 ? (
         <EmptyState
           icon={FileText}
-          title="No requests submitted"
-          description="Inventory requests let team members request stock for their departments."
-          actionLabel="New Request"
+          title={t("requests.empty.title")}
+          description={t("requests.empty.description")}
+          actionLabel={t("requests.empty.action")}
           onAction={() => setFormOpen(true)}
         />
       ) : isManagerOrAdmin ? (
         <Tabs defaultValue="all">
           <TabsList>
-            <TabsTrigger value="all">All Requests</TabsTrigger>
+            <TabsTrigger value="all">{t("requests.tabs.all")}</TabsTrigger>
             <TabsTrigger value="pending" className="gap-1.5">
-              Pending Approval
+              {t("requests.tabs.pending")}
               {pendingCount > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
                   {pendingCount}
@@ -201,22 +202,21 @@ function RequestsPage() {
 
       {approval.renderDialogs()}
 
-      {/* Cancel confirmation */}
       <AlertDialog open={!!cancelTarget} onOpenChange={(o) => !o && setCancelTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel {cancelTarget?.requestNumber}?</AlertDialogTitle>
+            <AlertDialogTitle>{t("requests.cancel.title", { number: cancelTarget?.requestNumber ?? "" })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The request will be marked as cancelled.
+              {t("requests.cancel.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Request</AlertDialogCancel>
+            <AlertDialogCancel>{t("requests.cancel.keep")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={confirmCancel}
             >
-              Confirm Cancel
+              {t("requests.cancel.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

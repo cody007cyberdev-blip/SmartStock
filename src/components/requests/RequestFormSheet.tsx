@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 import { z } from "zod";
@@ -30,20 +31,6 @@ interface LineRow {
   quantity: number;
 }
 
-const schema = z.object({
-  title: z.string().min(1, "Title is required"),
-  reason: z.string().min(1, "Reason is required"),
-  priority: z.enum(["normal", "urgent"]),
-  lines: z
-    .array(
-      z.object({
-        itemId: z.string().min(1, "Select an item"),
-        quantity: z.number().min(1, "Qty must be at least 1"),
-      }),
-    )
-    .min(1, "Add at least one line item"),
-});
-
 interface RequestFormSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,6 +38,7 @@ interface RequestFormSheetProps {
 }
 
 export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheetProps) {
+  const { t } = useTranslation();
   const createRequest = useCreateRequest();
   const [title, setTitle] = useState("");
   const [reason, setReason] = useState("");
@@ -61,6 +49,20 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const itemMap = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+
+  const schema = z.object({
+    title: z.string().min(1, t("requests.form.titleRequired")),
+    reason: z.string().min(1, t("requests.form.reasonRequired")),
+    priority: z.enum(["normal", "urgent"]),
+    lines: z
+      .array(
+        z.object({
+          itemId: z.string().min(1, t("requests.form.itemRequired")),
+          quantity: z.number().min(1, t("requests.form.qtyMin")),
+        }),
+      )
+      .min(1, t("requests.form.lineRequired")),
+  });
 
   function resetForm() {
     setTitle("");
@@ -106,7 +108,7 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
         fieldErrors[key] = issue.message;
       }
       if (result.error.issues.some((i) => i.path[0] === "lines" && i.path.length === 1)) {
-        fieldErrors["lines"] = "Add at least one line item";
+        fieldErrors["lines"] = t("requests.form.lineRequired");
       }
       setErrors(fieldErrors);
       return;
@@ -138,11 +140,11 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
       },
       {
         onSuccess: () => {
-          toast.success("Request submitted");
+          toast.success(t("requests.form.success"));
           resetForm();
           onOpenChange(false);
         },
-        onError: (e) => toast.error(e.message || "Failed to submit request."),
+        onError: (e) => toast.error(e.message || t("requests.form.failed")),
       },
     );
   }
@@ -157,33 +159,31 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
     >
       <SheetContent className="w-full overflow-y-auto sm:max-w-[560px]">
         <SheetHeader>
-          <SheetTitle>New Request</SheetTitle>
-          <SheetDescription>Submit an inventory request</SheetDescription>
+          <SheetTitle>{t("requests.form.title")}</SheetTitle>
+          <SheetDescription>{t("requests.form.description")}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-4">
-          {/* Title */}
           <div className="space-y-1.5">
-            <Label htmlFor="req-title">Title *</Label>
+            <Label htmlFor="req-title">{t("requests.form.titleLabel")}</Label>
             <Input
               id="req-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Short description of what you need"
+              placeholder={t("requests.form.titlePlaceholder")}
             />
             {errors["title"] && (
               <p className="text-xs text-destructive">{errors["title"]}</p>
             )}
           </div>
 
-          {/* Reason */}
           <div className="space-y-1.5">
-            <Label htmlFor="req-reason">Reason / Justification *</Label>
+            <Label htmlFor="req-reason">{t("requests.form.reasonLabel")}</Label>
             <Textarea
               id="req-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Why do you need these items?"
+              placeholder={t("requests.form.reasonPlaceholder")}
               rows={3}
             />
             {errors["reason"] && (
@@ -191,23 +191,21 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
             )}
           </div>
 
-          {/* Priority */}
           <div className="space-y-1.5">
-            <Label>Priority</Label>
+            <Label>{t("requests.form.priorityLabel")}</Label>
             <Select value={priority} onValueChange={(v) => setPriority(v as "normal" | "urgent")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="normal">{t("requests.priority.normal")}</SelectItem>
+                <SelectItem value="urgent">{t("requests.priority.urgent")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Line items */}
           <div className="space-y-2">
-            <Label>Line Items *</Label>
+            <Label>{t("requests.form.lineItemsLabel")}</Label>
             {errors["lines"] && (
               <p className="text-xs text-destructive">{errors["lines"]}</p>
             )}
@@ -222,14 +220,14 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
                       onValueChange={(v) => updateLine(line.id, "itemId", v)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select item" />
+                        <SelectValue placeholder={t("requests.form.itemPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {items
                           .filter((i) => i.currentStock > 0)
                           .map((i) => (
                             <SelectItem key={i.id} value={i.id}>
-                              {i.name} ({i.currentStock} avail)
+                              {i.name} ({t("requests.form.itemAvailable", { count: i.currentStock })})
                             </SelectItem>
                           ))}
                       </SelectContent>
@@ -263,13 +261,12 @@ export function RequestFormSheet({ open, onOpenChange, items }: RequestFormSheet
             })}
             <Button type="button" size="sm" variant="outline" onClick={addLine} className="gap-1.5">
               <Plus className="h-3.5 w-3.5" />
-              Add Item
+              {t("requests.form.addItem")}
             </Button>
           </div>
 
-          {/* Submit */}
           <Button onClick={handleSubmit} className="w-full" disabled={createRequest.isLoading}>
-            Submit Request
+            {t("requests.form.submit")}
           </Button>
         </div>
       </SheetContent>

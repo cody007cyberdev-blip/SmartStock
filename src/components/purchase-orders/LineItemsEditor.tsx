@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,8 @@ interface LineItemsEditorProps {
 }
 
 export function LineItemsEditor({ items, lineItems, onChange, error }: LineItemsEditorProps) {
+  const { t } = useTranslation();
+
   function addRow() {
     onChange([
       ...lineItems,
@@ -64,16 +67,16 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Line Items</Label>
+        <Label className="text-sm font-medium">{t("purchaseOrders.lineItems.title")}</Label>
         <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1">
           <Plus className="h-3.5 w-3.5" />
-          Add Item
+          {t("purchaseOrders.lineItems.addItem")}
         </Button>
       </div>
 
       {lineItems.length === 0 && (
         <p className="py-4 text-center text-sm text-muted-foreground">
-          No line items. Click "Add Item" to start.
+          {t("purchaseOrders.lineItems.empty")}
         </p>
       )}
 
@@ -84,20 +87,19 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
             key={row.id}
             className="grid grid-cols-[1fr_80px_100px_90px_32px] items-end gap-2 rounded-md border border-border bg-muted/30 p-3"
           >
-            {/* Item select */}
             <div>
               {idx === 0 && (
-                <Label className="mb-1 block text-xs text-muted-foreground">Item</Label>
+                <Label className="mb-1 block text-xs text-muted-foreground">{t("purchaseOrders.lineItems.item")}</Label>
               )}
               <Select
                 value={row.itemId || "__none__"}
                 onValueChange={(v) => handleItemSelect(row.id, v === "__none__" ? "" : v)}
               >
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Select item" />
+                  <SelectValue placeholder={t("purchaseOrders.lineItems.itemPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__" disabled>Select item</SelectItem>
+                  <SelectItem value="__none__" disabled>{t("purchaseOrders.lineItems.itemPlaceholder")}</SelectItem>
                   {items.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.name} ({item.sku})
@@ -107,10 +109,9 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
               </Select>
             </div>
 
-            {/* Quantity */}
             <div>
               {idx === 0 && (
-                <Label className="mb-1 block text-xs text-muted-foreground">Qty</Label>
+                <Label className="mb-1 block text-xs text-muted-foreground">{t("purchaseOrders.lineItems.qty")}</Label>
               )}
               <Input
                 type="number"
@@ -121,10 +122,9 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
               />
             </div>
 
-            {/* Unit Cost */}
             <div>
               {idx === 0 && (
-                <Label className="mb-1 block text-xs text-muted-foreground">Unit Cost</Label>
+                <Label className="mb-1 block text-xs text-muted-foreground">{t("purchaseOrders.lineItems.unitCost")}</Label>
               )}
               <Input
                 type="number"
@@ -136,17 +136,15 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
               />
             </div>
 
-            {/* Line total */}
             <div>
               {idx === 0 && (
-                <Label className="mb-1 block text-xs text-muted-foreground">Total</Label>
+                <Label className="mb-1 block text-xs text-muted-foreground">{t("purchaseOrders.lineItems.total")}</Label>
               )}
               <span className="flex h-8 items-center text-xs font-mono font-medium text-foreground">
                 ${lineTotal.toFixed(2)}
               </span>
             </div>
 
-            {/* Remove */}
             <div>
               {idx === 0 && <div className="mb-1 h-4" />}
               <Button
@@ -155,7 +153,7 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
                 size="sm"
                 className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
                 onClick={() => removeRow(row.id)}
-                aria-label="Remove line item"
+                aria-label={t("purchaseOrders.lineItems.removeItem")}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -171,7 +169,7 @@ export function LineItemsEditor({ items, lineItems, onChange, error }: LineItems
       {lineItems.length > 0 && (
         <div className="flex justify-end border-t border-border pt-3">
           <span className="text-sm font-medium text-foreground">
-            Total:{" "}
+            {t("purchaseOrders.lineItems.total")}:{" "}
             <span className="font-mono text-base">
               ${runningTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>

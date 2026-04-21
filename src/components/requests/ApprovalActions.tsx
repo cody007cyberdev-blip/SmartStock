@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -18,23 +19,6 @@ import { RequestStatus, MovementType } from "@/types/inventory";
 import type { InventoryRequest, Item, StockMovement } from "@/types/inventory";
 
 type DialogType = "approve" | "partial" | "decline" | null;
-
-function checkStock(
-  reqItems: InventoryRequest["items"],
-  itemMap: Map<string, Item>,
-  qtys?: Record<string, number>,
-): string | null {
-  for (const li of reqItems) {
-    const qty = qtys ? (qtys[li.id] ?? 0) : li.quantity;
-    if (qty === 0) continue;
-    const item = itemMap.get(li.itemId);
-    if (!item) continue;
-    if (qty > item.currentStock) {
-      return `Insufficient stock for ${item.name} (available: ${item.currentStock}, requested: ${qty})`;
-    }
-  }
-  return null;
-}
 
 function buildMovements(
   request: InventoryRequest,
@@ -61,6 +45,7 @@ function buildMovements(
 }
 
 export function useApprovalActions({ items }: { items: Item[] }) {
+  const { t } = useTranslation();
   const { isDemo, demoStore, bumpVersion } = useDemo();
   const [dialog, setDialog] = useState<DialogType>(null);
   const [activeRequest, setActiveRequest] = useState<InventoryRequest | null>(null);
@@ -69,6 +54,22 @@ export function useApprovalActions({ items }: { items: Item[] }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const itemMap = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
+
+  const checkStock = (
+    reqItems: InventoryRequest["items"],
+    qtys?: Record<string, number>,
+  ): string | null => {
+    for (const li of reqItems) {
+      const qty = qtys ? (qtys[li.id] ?? 0) : li.quantity;
+      if (qty === 0) continue;
+      const item = itemMap.get(li.itemId);
+      if (!item) continue;
+      if (qty > item.currentStock) {
+        return t("requests.approval.insufficientStock", { name: item.name, available: item.currentStock, requested: qty });
+      }
+    }
+    return null;
+  };
 
   function openApprove(req: InventoryRequest) {
     setActiveRequest(req);
@@ -93,7 +94,7 @@ export function useApprovalActions({ items }: { items: Item[] }) {
 
   function confirmApprove() {
     if (!activeRequest || !isDemo || !demoStore) return;
-    const err = checkStock(activeRequest.items, itemMap);
+    const err = checkStock(activeRequest.items);
     if (err) { toast.error(err); return; }
 
     const now = new Date().toISOString();
@@ -107,7 +108,7 @@ export function useApprovalActions({ items }: { items: Item[] }) {
         updatedAt: now,
       });
       bumpVersion();
-      toast.success(`${activeRequest.requestNumber} approved`);
+      toast.success(t("requests.approval.approved", { number: activeRequest.requestNumber }));
       setDialog(null);
       setActiveRequest(null);
     } finally {
@@ -127,7 +128,7 @@ export function useApprovalActions({ items }: { items: Item[] }) {
         updatedAt: now,
       });
       bumpVersion();
-      toast.success(`${activeRequest.requestNumber} declined`);
+      toast.success(t("requests.approval.declined", { number: activeRequest.requestNumber }));
       setDialog(null);
       setActiveRequest(null);
     } finally {
@@ -138,9 +139,9 @@ export function useApprovalActions({ items }: { items: Item[] }) {
   function confirmPartial() {
     if (!activeRequest || !isDemo || !demoStore) return;
     const allZero = activeRequest.items.every((li) => (partialQtys[li.id] ?? 0) === 0);
-    if (allZero) { toast.error("Approve at least one item quantity"); return; }
+    if (allZero) { toast.error(t("requests.approval.approveAtLeastOne")); return; }
 
-    const err = checkStock(activeRequest.items, itemMap, partialQtys);
+    const err = checkStock(activeRequest.items, partialQtys);
     if (err) { toast.error(err); return; }
 
     const allFull = activeRequest.items.every((li) => (partialQtys[li.id] ?? 0) >= li.quantity);
@@ -158,7 +159,9 @@ export function useApprovalActions({ items }: { items: Item[] }) {
       });
       bumpVersion();
       toast.success(
-        `${activeRequest.requestNumber} ${allFull ? "approved" : "partially fulfilled"}`,
+        allFull
+          ? t("requests.approval.approved", { number: activeRequest.requestNumber })
+          : t("requests.approval.partiallyFulfilled", { number: activeRequest.requestNumber }),
       );
       setDialog(null);
       setActiveRequest(null);
@@ -170,63 +173,60 @@ export function useApprovalActions({ items }: { items: Item[] }) {
   function renderDialogs() {
     return (
       <>
-        {/* Approve confirm */}
         <AlertDialog open={dialog === "approve"} onOpenChange={(o) => !o && setDialog(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Approve {activeRequest?.requestNumber}?</AlertDialogTitle>
+              <AlertDialogTitle>{t("requests.approval.approveTitle", { number: activeRequest?.requestNumber ?? "" })}</AlertDialogTitle>
               <AlertDialogDescription>
-                This will approve all requested quantities and create stock movements.
+                {t("requests.approval.approveDesc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={confirmApprove}>
-                Confirm Approve
+                {t("requests.approval.confirmApprove")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Decline dialog */}
         <AlertDialog open={dialog === "decline"} onOpenChange={(o) => !o && setDialog(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Decline {activeRequest?.requestNumber}?</AlertDialogTitle>
+              <AlertDialogTitle>{t("requests.approval.declineTitle", { number: activeRequest?.requestNumber ?? "" })}</AlertDialogTitle>
               <AlertDialogDescription>
-                Please provide a reason for declining this request.
+                {t("requests.approval.declineDesc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="py-2">
-              <Label htmlFor="decline-reason">Reason *</Label>
+              <Label htmlFor="decline-reason">{t("requests.approval.reasonLabel")}</Label>
               <Textarea
                 id="decline-reason"
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
-                placeholder="Why is this request being declined?"
+                placeholder={t("requests.approval.reasonPlaceholder")}
                 rows={3}
               />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={confirmDecline}
                 disabled={!declineReason.trim()}
               >
-                Confirm Decline
+                {t("requests.approval.confirmDecline")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Partial fulfill dialog */}
         <AlertDialog open={dialog === "partial"} onOpenChange={(o) => !o && setDialog(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Partial Fulfill {activeRequest?.requestNumber}</AlertDialogTitle>
+              <AlertDialogTitle>{t("requests.approval.partialTitle", { number: activeRequest?.requestNumber ?? "" })}</AlertDialogTitle>
               <AlertDialogDescription>
-                Enter the approved quantity for each line item.
+                {t("requests.approval.partialDesc")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-3 py-2">
@@ -238,7 +238,7 @@ export function useApprovalActions({ items }: { items: Item[] }) {
                       {item?.name ?? li.itemId}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      of {li.quantity} (avail: {item?.currentStock ?? 0})
+                      {t("requests.approval.partialOf", { qty: li.quantity, available: item?.currentStock ?? 0 })}
                     </span>
                     <Input
                       type="number"
@@ -258,9 +258,9 @@ export function useApprovalActions({ items }: { items: Item[] }) {
               })}
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={confirmPartial}>
-                Confirm
+                {t("common.confirm")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Sheet,
   SheetContent,
@@ -35,6 +36,7 @@ export function ReceiveShipmentSheet({
   items,
   onConfirm,
 }: ReceiveShipmentSheetProps) {
+  const { t } = useTranslation();
   const itemMap = useMemo(
     () => new Map(items.map((i) => [i.id, i])),
     [items],
@@ -54,7 +56,6 @@ export function ReceiveShipmentSheet({
   const [qtys, setQtys] = useState<Record<string, number>>(initialQtys);
   const [notes, setNotes] = useState("");
 
-  // Reset when sheet opens with new PO
   const [lastPOId, setLastPOId] = useState(purchaseOrder.id);
   if (purchaseOrder.id !== lastPOId) {
     setLastPOId(purchaseOrder.id);
@@ -83,9 +84,9 @@ export function ReceiveShipmentSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-[560px]">
         <SheetHeader>
-          <SheetTitle>Receive Shipment — {purchaseOrder.orderNumber}</SheetTitle>
+          <SheetTitle>{t("purchaseOrders.receive.title", { number: purchaseOrder.orderNumber })}</SheetTitle>
           <SheetDescription>
-            Enter the quantity received for each line item.
+            {t("purchaseOrders.receive.description")}
           </SheetDescription>
         </SheetHeader>
 
@@ -94,11 +95,11 @@ export function ReceiveShipmentSheet({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead className="w-[60px] text-right">Ordered</TableHead>
-                  <TableHead className="w-[70px] text-right">Received</TableHead>
-                  <TableHead className="w-[70px] text-right">Remaining</TableHead>
-                  <TableHead className="w-[90px] text-right">Receiving</TableHead>
+                  <TableHead>{t("purchaseOrders.lineItems.item")}</TableHead>
+                  <TableHead className="w-[60px] text-right">{t("purchaseOrders.detail.ordered")}</TableHead>
+                  <TableHead className="w-[70px] text-right">{t("purchaseOrders.detail.received")}</TableHead>
+                  <TableHead className="w-[70px] text-right">{t("purchaseOrders.detail.remaining")}</TableHead>
+                  <TableHead className="w-[90px] text-right">{t("purchaseOrders.receive.receiving")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -139,10 +140,10 @@ export function ReceiveShipmentSheet({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="receive-notes">Shipment Notes</Label>
+            <Label htmlFor="receive-notes">{t("purchaseOrders.receive.shipmentNotes")}</Label>
             <Textarea
               id="receive-notes"
-              placeholder="Optional notes about this shipment..."
+              placeholder={t("purchaseOrders.receive.notesPh")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
@@ -154,7 +155,7 @@ export function ReceiveShipmentSheet({
             disabled={!hasAnyQty}
             onClick={handleConfirm}
           >
-            Confirm Receipt
+            {t("purchaseOrders.receive.confirm")}
           </Button>
         </div>
       </SheetContent>

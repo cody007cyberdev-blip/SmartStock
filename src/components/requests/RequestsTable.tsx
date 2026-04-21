@@ -1,5 +1,7 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
+import { ptBR, enUS } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -12,13 +14,13 @@ import {
 import { RequestStatus } from "@/types/inventory";
 import type { InventoryRequest } from "@/types/inventory";
 
-const STATUS_LABEL: Record<RequestStatus, string> = {
-  [RequestStatus.Pending]: "Pending",
-  [RequestStatus.Approved]: "Approved",
-  [RequestStatus.PartiallyFulfilled]: "Partial",
-  [RequestStatus.Fulfilled]: "Fulfilled",
-  [RequestStatus.Declined]: "Declined",
-  [RequestStatus.Cancelled]: "Cancelled",
+const STATUS_KEY: Record<RequestStatus, "pending" | "approved" | "partial" | "fulfilled" | "declined" | "cancelled"> = {
+  [RequestStatus.Pending]: "pending",
+  [RequestStatus.Approved]: "approved",
+  [RequestStatus.PartiallyFulfilled]: "partial",
+  [RequestStatus.Fulfilled]: "fulfilled",
+  [RequestStatus.Declined]: "declined",
+  [RequestStatus.Cancelled]: "cancelled",
 };
 
 const STATUS_CLASS: Record<RequestStatus, string> = {
@@ -38,6 +40,9 @@ interface RequestsTableProps {
 }
 
 export function RequestsTable({ requests, onRowClick, showRequestor = false, preSorted = false }: RequestsTableProps) {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith("pt") ? ptBR : enUS;
+
   const sorted = useMemo(
     () => preSorted ? requests : [...requests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [requests, preSorted],
@@ -46,7 +51,7 @@ export function RequestsTable({ requests, onRowClick, showRequestor = false, pre
   if (sorted.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16">
-        <p className="text-sm text-muted-foreground">No requests submitted yet.</p>
+        <p className="text-sm text-muted-foreground">{t("requests.table.empty")}</p>
       </div>
     );
   }
@@ -56,13 +61,13 @@ export function RequestsTable({ requests, onRowClick, showRequestor = false, pre
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Request ID</TableHead>
-            <TableHead>Title</TableHead>
-            {showRequestor && <TableHead>Requestor</TableHead>}
-            <TableHead>Status</TableHead>
-            <TableHead className="text-center">Items</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead>{t("requests.table.requestId")}</TableHead>
+            <TableHead>{t("requests.table.title")}</TableHead>
+            {showRequestor && <TableHead>{t("requests.table.requestor")}</TableHead>}
+            <TableHead>{t("requests.table.status")}</TableHead>
+            <TableHead className="text-center">{t("requests.table.items")}</TableHead>
+            <TableHead>{t("requests.table.priority")}</TableHead>
+            <TableHead>{t("requests.table.created")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -79,7 +84,7 @@ export function RequestsTable({ requests, onRowClick, showRequestor = false, pre
               )}
               <TableCell>
                 <Badge variant="outline" className={STATUS_CLASS[req.status]}>
-                  {STATUS_LABEL[req.status]}
+                  {t(`requests.status.${STATUS_KEY[req.status]}` as const)}
                 </Badge>
               </TableCell>
               <TableCell className="text-center font-mono text-sm">
@@ -88,14 +93,14 @@ export function RequestsTable({ requests, onRowClick, showRequestor = false, pre
               <TableCell>
                 {req.priority === "urgent" ? (
                   <Badge variant="outline" className="bg-amber-accent/15 text-amber-accent border-amber-accent/20">
-                    Urgent
+                    {t("requests.priority.urgent")}
                   </Badge>
                 ) : (
-                  <span className="text-sm text-muted-foreground">Normal</span>
+                  <span className="text-sm text-muted-foreground">{t("requests.priority.normal")}</span>
                 )}
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {format(new Date(req.createdAt), "MMM d, yyyy")}
+                {format(new Date(req.createdAt), "MMM d, yyyy", { locale: dateLocale })}
               </TableCell>
             </TableRow>
           ))}
