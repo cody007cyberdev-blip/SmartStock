@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Plus, Menu, User, LogOut, Settings, ChevronDown, ScanBarcode } from "lucide-react";
+import { Search, Plus, Menu, User, LogOut, Settings, ChevronDown, ScanBarcode, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -36,6 +36,12 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
 };
 
 export function Header() {
+interface HeaderProps {
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+export function Header({ sidebarCollapsed = false, onToggleSidebar }: HeaderProps) {
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
@@ -70,6 +76,16 @@ export function Header() {
     <header className="flex h-16 items-center gap-3 border-b border-border bg-card px-4 shadow-sm md:px-8">
       <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(true)} aria-label={t("common.openMenu")}>
         <Menu className="h-5 w-5" />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="hidden md:inline-flex"
+        onClick={onToggleSidebar}
+        aria-label={sidebarCollapsed ? t("common.openMenu") : t("common.close")}
+      >
+        {sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>
 
       <button data-tour="search" type="button" onClick={() => setPaletteOpen(true)} className="flex h-9 flex-1 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 md:max-w-sm">

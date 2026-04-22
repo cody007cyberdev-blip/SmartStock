@@ -80,10 +80,11 @@ const standaloneLinks: NavItem[] = [
 ];
 
 interface SidebarProps {
+  collapsed?: boolean;
   onNavigate?: () => void;
 }
 
-export function Sidebar({ onNavigate }: SidebarProps) {
+export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
   const location = useLocation();
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -103,22 +104,49 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     }))
     .filter((g) => g.items.length > 0);
 
+  const groupState = collapsed;
+  const setGroupState = setCollapsed;
+  const compactLinks = [...visibleGroups.flatMap((group) => group.items), ...standaloneLinks];
+
   return (
-    <nav data-tour="sidebar" className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex h-14 items-center gap-2 px-5">
+    <nav data-tour="sidebar" className={cn("flex h-full flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200", collapsed ? "w-16" : "w-[260px]")}>
+      <div className={cn("flex h-14 items-center gap-2", collapsed ? "justify-center px-2" : "px-5")}>
         <Brain className="h-5 w-5 text-sidebar-primary" />
-        <span className="text-lg font-semibold tracking-tight text-sidebar-primary-foreground">StockMind</span>
+        {!collapsed && <span className="text-lg font-semibold tracking-tight text-sidebar-primary-foreground">StockMind</span>}
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-2">
+        {collapsed ? (
+          <div className="space-y-1">
+            {compactLinks.map((item, idx) => (
+              <div key={item.href}>
+                {idx === visibleGroups.flatMap((group) => group.items).length && <div className="mx-1 my-2 border-t border-sidebar-border" />}
+                <Link
+                  to={item.href}
+                  onClick={onNavigate}
+                  title={t(item.labelKey)}
+                  aria-label={t(item.labelKey)}
+                  className={cn(
+                    "flex h-10 items-center justify-center rounded-md transition-colors",
+                    isActive(item.href)
+                      ? "bg-sidebar-accent text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
         {visibleGroups.map((group, idx) => {
-          const isCollapsed = collapsed[group.groupKey] ?? false;
+          const isCollapsed = groupState[group.groupKey] ?? false;
           return (
             <div key={group.groupKey}>
               {idx > 0 && <div className="mx-2 my-2 border-t border-sidebar-border" />}
               <button
                 type="button"
-                onClick={() => toggleGroup(group.groupKey)}
+                onClick={() => setGroupState((prev) => ({ ...prev, [group.groupKey]: !prev[group.groupKey] }))}
                 className="flex w-full items-center gap-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
               >
                 <ChevronRight className={cn("h-3 w-3 transition-transform duration-150", !isCollapsed && "rotate-90")} />
@@ -168,6 +196,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </Link>
           ))}
         </div>
+        )}
       </div>
     </nav>
   );

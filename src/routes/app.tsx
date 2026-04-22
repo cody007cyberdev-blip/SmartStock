@@ -23,6 +23,7 @@ function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Global keyboard shortcuts
   useKeyboardShortcuts({ onHelpOpen: () => setHelpOpen(true) });
@@ -54,11 +55,11 @@ function AppLayout() {
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <DemoBanner />
       <div className="flex flex-1 overflow-hidden">
-        <aside className="hidden w-[260px] shrink-0 md:block">
-          <Sidebar />
+        <aside className="hidden shrink-0 md:block">
+          <Sidebar collapsed={sidebarCollapsed} />
         </aside>
         <div className="flex flex-1 flex-col overflow-hidden">
-          <Header />
+          <Header sidebarCollapsed={sidebarCollapsed} onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)} />
           <main className="flex-1 overflow-y-auto p-4 pb-20 md:p-8 md:pb-8">
             <AnimatePresence mode="wait">
               <PageTransition routeKey={location.pathname}>
