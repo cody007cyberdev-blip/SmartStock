@@ -35,7 +35,6 @@ const ROLE_BADGE_STYLES: Record<string, string> = {
   requestor: "bg-muted text-muted-foreground border-border",
 };
 
-export function Header() {
 interface HeaderProps {
   sidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;

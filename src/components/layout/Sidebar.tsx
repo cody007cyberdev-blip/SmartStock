@@ -87,11 +87,11 @@ interface SidebarProps {
 export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
   const location = useLocation();
   const { t } = useTranslation();
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const { permissions } = useRole();
 
   const toggleGroup = (key: string) => {
-    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const isActive = (href: string) => location.pathname === href;
@@ -104,8 +104,6 @@ export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
     }))
     .filter((g) => g.items.length > 0);
 
-  const groupState = collapsed;
-  const setGroupState = setCollapsed;
   const compactLinks = [...visibleGroups.flatMap((group) => group.items), ...standaloneLinks];
 
   return (
@@ -139,63 +137,66 @@ export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
             ))}
           </div>
         ) : (
-        {visibleGroups.map((group, idx) => {
-          const isCollapsed = groupState[group.groupKey] ?? false;
-          return (
-            <div key={group.groupKey}>
-              {idx > 0 && <div className="mx-2 my-2 border-t border-sidebar-border" />}
-              <button
-                type="button"
-                onClick={() => setGroupState((prev) => ({ ...prev, [group.groupKey]: !prev[group.groupKey] }))}
-                className="flex w-full items-center gap-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/50 hover:text-sidebar-foreground/80 transition-colors"
-              >
-                <ChevronRight className={cn("h-3 w-3 transition-transform duration-150", !isCollapsed && "rotate-90")} />
-                {t(group.labelKey)}
-              </button>
+          <>
+            {visibleGroups.map((group, idx) => {
+              const isGroupCollapsed = collapsedGroups[group.groupKey] ?? false;
 
-              {!isCollapsed && (
-                <div className="mt-0.5 space-y-0.5">
-                  {group.items.map((item) => (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={onNavigate}
-                      className={cn(
-                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                        isActive(item.href)
-                          ? "bg-sidebar-accent font-medium text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {t(item.labelKey)}
-                    </Link>
-                  ))}
+              return (
+                <div key={group.groupKey}>
+                  {idx > 0 && <div className="mx-2 my-2 border-t border-sidebar-border" />}
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.groupKey)}
+                    className="flex w-full items-center gap-1 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-sidebar-foreground/50 transition-colors hover:text-sidebar-foreground/80"
+                  >
+                    <ChevronRight className={cn("h-3 w-3 transition-transform duration-150", !isGroupCollapsed && "rotate-90")} />
+                    {t(group.labelKey)}
+                  </button>
+
+                  {!isGroupCollapsed && (
+                    <div className="mt-0.5 space-y-0.5">
+                      {group.items.map((item) => (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          onClick={onNavigate}
+                          className={cn(
+                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                            isActive(item.href)
+                              ? "bg-sidebar-accent font-medium text-sidebar-primary-foreground"
+                              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                          )}
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {t(item.labelKey)}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
 
-        <div className="mx-2 my-2 border-t border-sidebar-border" />
-        <div className="space-y-0.5">
-          {standaloneLinks.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                isActive(item.href)
-                  ? "bg-sidebar-accent font-medium text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-              )}
-            >
-              <item.icon className="h-4 w-4 shrink-0" />
-              {t(item.labelKey)}
-            </Link>
-          ))}
-        </div>
+            <div className="mx-2 my-2 border-t border-sidebar-border" />
+            <div className="space-y-0.5">
+              {standaloneLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                    isActive(item.href)
+                      ? "bg-sidebar-accent font-medium text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {t(item.labelKey)}
+                </Link>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </nav>
