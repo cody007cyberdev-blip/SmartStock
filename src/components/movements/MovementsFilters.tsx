@@ -161,7 +161,7 @@ export function MovementsFilters(props: MovementsFiltersProps) {
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <Label className="mb-1.5 block text-xs text-muted-foreground">{t("movements.filters.type")}</Label>
           <div className="flex flex-wrap gap-2">
@@ -202,7 +202,7 @@ export function MovementsFilters(props: MovementsFiltersProps) {
 
         <div>
           <Label className="mb-1.5 block text-xs text-muted-foreground">{t("movements.filters.dateRange")}</Label>
-          <div className="flex gap-1">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Input
               type="date"
               className="h-8 text-xs"
@@ -218,8 +218,8 @@ export function MovementsFilters(props: MovementsFiltersProps) {
           </div>
         </div>
 
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="min-w-0 flex-1">
             <Label className="mb-1.5 block text-xs text-muted-foreground">{t("movements.filters.performedBy")}</Label>
             <Select
               value={props.filters.performedBy ?? "__all__"}
@@ -237,7 +237,7 @@ export function MovementsFilters(props: MovementsFiltersProps) {
             </Select>
           </div>
           {isFiltersActive(props.filters) && (
-            <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={() => props.onChange(EMPTY_MOVEMENT_FILTERS)}>
+            <Button variant="ghost" size="sm" className="h-8 justify-start gap-1 text-xs sm:justify-center" onClick={() => props.onChange(EMPTY_MOVEMENT_FILTERS)}>
               <X className="h-3 w-3" />{t("movements.filters.clear")}
             </Button>
           )}
