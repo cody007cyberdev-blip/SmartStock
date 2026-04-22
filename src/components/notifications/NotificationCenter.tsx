@@ -60,18 +60,18 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col">
         <SheetHeader className="border-b border-border px-4 py-3">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-base">
-              {t("notifications.title")}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <SheetTitle className="flex min-w-0 flex-wrap items-center gap-2 text-base">
+              <span className="truncate">{t("notifications.title")}</span>
               {unreadCount > 0 && (
-                <span className="ml-2 rounded-full bg-destructive px-2 py-0.5 font-mono text-xs text-destructive-foreground">
+                <span className="rounded-full bg-destructive px-2 py-0.5 font-mono text-xs text-destructive-foreground">
                   {unreadCount}
                 </span>
               )}
             </SheetTitle>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1 sm:justify-end">
               {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" className="text-xs" onClick={markAllAsRead}>
+                <Button variant="ghost" size="sm" className="h-auto max-w-full gap-1 px-2 py-1 text-left text-xs whitespace-normal" onClick={markAllAsRead}>
                   <CheckCheck className="mr-1 h-3.5 w-3.5" />
                   {t("notifications.markAllAsRead")}
                 </Button>
