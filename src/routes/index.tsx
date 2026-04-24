@@ -44,6 +44,8 @@ export const Route = createFileRoute("/")({
 
 /* ─── Brand tokens (Ice Blue palette) ──────────────────── */
 import logoCube from "@/assets/logo-cube.png";
+import demoDashboard from "@/assets/demo-dashboard-preview.png";
+import heroCubes from "@/assets/hero-cubes-3d.png";
 
 const BRAND = {
   petrol: "#0B2A5B",
