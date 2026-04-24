@@ -44,6 +44,8 @@ export const Route = createFileRoute("/")({
 
 /* ─── Brand tokens (Ice Blue palette) ──────────────────── */
 import logoCube from "@/assets/logo-cube.png";
+import demoDashboard from "@/assets/demo-dashboard-preview.png";
+import heroCubes from "@/assets/hero-cubes-3d.png";
 
 const BRAND = {
   petrol: "#0B2A5B",
@@ -54,6 +56,7 @@ const BRAND = {
 const navLinks = [
   { label: "Recursos", href: "#features" },
   { label: "Inteligência", href: "#ai" },
+  { label: "Demo", href: "#demo" },
   { label: "Como funciona", href: "#how" },
 ];
 
@@ -184,144 +187,91 @@ function Logo() {
   );
 }
 
-/* ─── Animated hero illustration ──────────────────────── */
+/* ─── Animated 3D hero scene ──────────────────────────── */
 function HeroVisual() {
-  const metrics = [
-    { label: "Acurácia IA", value: "99,2%", color: BRAND.emerald, icon: Brain },
-    { label: "SKUs ativos", value: "12.847", color: BRAND.petrol, icon: Boxes },
-    { label: "Reposições sugeridas", value: "37", color: BRAND.orange, icon: Sparkles },
-  ];
   return (
-    <div className="relative mx-auto h-[420px] w-full max-w-md sm:h-[480px]">
+    <div className="relative mx-auto h-[460px] w-full max-w-xl sm:h-[540px] lg:h-[580px]">
       {/* Floating gradient blobs */}
       <div className="pointer-events-none absolute -left-16 -top-10 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.petrol }} />
       <div className="pointer-events-none absolute -right-10 top-20 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.emerald, animationDelay: "-6s" }} />
       <div className="pointer-events-none absolute bottom-0 left-1/3 h-56 w-56 rounded-full opacity-30 blur-3xl animate-blob" style={{ background: BRAND.orange, animationDelay: "-12s" }} />
 
-      {/* Central card */}
+      {/* 3D rotating cubes (CSS perspective, no deps) */}
+      <motion.img
+        src={heroCubes}
+        alt=""
+        aria-hidden
+        width={1024}
+        height={1024}
+        className="pointer-events-none absolute inset-0 m-auto h-full w-full object-contain drop-shadow-2xl"
+        initial={{ opacity: 0, scale: 0.85, rotate: -6 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0, y: [0, -14, 0] }}
+        transition={{
+          opacity: { duration: 0.9, ease: "easeOut" },
+          scale: { duration: 0.9, ease: "easeOut" },
+          rotate: { duration: 0.9, ease: "easeOut" },
+          y: { duration: 7, repeat: Infinity, ease: "easeInOut" },
+        }}
+      />
+
+      {/* Floating chip — Alert */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="absolute left-1/2 top-1/2 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-2xl backdrop-blur-xl"
+        initial={{ opacity: 0, x: -20, y: -10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 0.9, duration: 0.6 }}
+        className="absolute left-0 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo />
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-tech">Live</p>
-              <p className="text-sm font-bold text-slate-900">StockMind AI</p>
-            </div>
-          </div>
-          <span className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: `${BRAND.emerald}15`, color: BRAND.emerald }}>
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: BRAND.emerald }} />
-            Online
-          </span>
-        </div>
-
-        <div className="mt-5 space-y-2.5">
-          {metrics.map((m, i) => (
-            <motion.div
-              key={m.label}
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + i * 0.15, duration: 0.5 }}
-              className="flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-3"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${m.color}18`, color: m.color }}>
-                  <m.icon className="h-4 w-4" />
-                </span>
-                <span className="text-xs font-medium text-slate-600">{m.label}</span>
-              </div>
-              <span className="font-tech text-sm font-bold text-slate-900">{m.value}</span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Mini sparkline */}
-        <div className="mt-4 rounded-xl border border-slate-100 p-3">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-500">Demanda prevista · 7d</span>
-            <span className="font-tech text-[11px]" style={{ color: BRAND.emerald }}>+12,4%</span>
-          </div>
-          <Sparkline />
-        </div>
-      </motion.div>
-
-      {/* Floating chips */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9, duration: 0.5 }}
-        className="absolute -left-2 top-6 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg ring-1 ring-slate-200 animate-float-soft"
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}20`, color: BRAND.orange }}>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}25`, color: BRAND.orange }}>
           <Bell className="h-3.5 w-3.5" />
         </span>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Alerta</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Alerta IA</p>
           <p className="text-xs font-semibold text-slate-800">Reposição em 3 dias</p>
         </div>
       </motion.div>
 
+      {/* Floating chip — Forecast */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.1, duration: 0.5 }}
-        className="absolute -right-2 bottom-10 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg ring-1 ring-slate-200 animate-float-soft"
+        initial={{ opacity: 0, x: 20, y: 10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 1.1, duration: 0.6 }}
+        className="absolute right-0 top-1/3 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
         style={{ animationDelay: "-3s" }}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.emerald}20`, color: BRAND.emerald }}>
           <TrendingUp className="h-3.5 w-3.5" />
         </span>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">IA</p>
-          <p className="text-xs font-semibold text-slate-800">Pico em 12 dias</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Forecast</p>
+          <p className="text-xs font-semibold text-slate-800">+12,4% próx. semana</p>
+        </div>
+      </motion.div>
+
+      {/* Floating chip — Live counter */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.6 }}
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-2xl ring-1 ring-slate-200 backdrop-blur-md"
+      >
+        <span className="relative flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${BRAND.emerald}18`, color: BRAND.emerald }}>
+          <Boxes className="h-4 w-4" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: BRAND.emerald }} />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ background: BRAND.emerald }} />
+          </span>
+        </span>
+        <div className="text-left">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 font-tech">SKUs ativos</p>
+          <p className="font-tech text-sm font-bold text-slate-900">12.847 · ao vivo</p>
         </div>
       </motion.div>
     </div>
   );
 }
 
-function Sparkline() {
-  const points = [22, 28, 25, 33, 30, 38, 36, 44, 42, 52, 48, 58];
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const w = 220;
-  const h = 44;
-  const path = points
-    .map((p, i) => {
-      const x = (i / (points.length - 1)) * w;
-      const y = h - ((p - min) / (max - min)) * h;
-      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(" ");
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={BRAND.emerald} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={BRAND.emerald} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${path} L ${w} ${h} L 0 ${h} Z`} fill="url(#sparkFill)" />
-      <motion.path
-        d={path}
-        fill="none"
-        stroke={BRAND.emerald}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.6, ease: "easeOut" }}
-      />
-    </svg>
-  );
-}
-
 /* ─── Page ────────────────────────────────────────────── */
+
 function LandingPage() {
   const { enterDemoMode } = useDemo();
   const navigate = useNavigate();
@@ -504,6 +454,79 @@ function LandingPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── Demo preview ─────────────────────────────── */}
+      <section id="demo" className="relative overflow-hidden px-4 py-24 sm:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-white via-slate-50 to-white" />
+
+        <RevealSection className="mx-auto max-w-3xl text-center">
+          <span className="font-tech text-xs font-bold uppercase tracking-[0.2em]" style={{ color: BRAND.orange }}>Demo ao vivo</span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Veja o StockMind em ação
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
+            Um ambiente completo, populado com dados realistas — explore antes mesmo de criar uma conta.
+          </p>
+        </RevealSection>
+
+        <RevealSection delay={120} className="mx-auto mt-14 max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative"
+          >
+            {/* Glow */}
+            <div
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[32px] opacity-60 blur-2xl"
+              style={{ background: `linear-gradient(135deg, ${BRAND.petrol}40, ${BRAND.emerald}40, ${BRAND.orange}30)` }}
+            />
+
+            {/* macOS-style window frame */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+                <span className="h-3 w-3 rounded-full bg-red-400" />
+                <span className="h-3 w-3 rounded-full bg-amber-400" />
+                <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                <span className="ml-3 font-tech text-[11px] text-slate-500">stockmind.app/dashboard</span>
+              </div>
+              <img
+                src={demoDashboard}
+                alt="Captura do painel do StockMind mostrando métricas de SKUs, previsão de demanda e atividade recente"
+                width={1600}
+                height={1024}
+                loading="lazy"
+                className="block w-full"
+              />
+            </div>
+
+            {/* Floating cube accent */}
+            <motion.img
+              src={heroCubes}
+              alt=""
+              aria-hidden
+              width={220}
+              height={220}
+              className="pointer-events-none absolute -right-6 -top-10 hidden h-40 w-40 drop-shadow-2xl md:block"
+              animate={{ y: [0, -10, 0], rotate: [0, 4, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={handleTryDemo}
+              className="group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              style={{ background: `linear-gradient(135deg, ${BRAND.petrol}, ${BRAND.emerald})` }}
+            >
+              Abrir demo agora
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+        </RevealSection>
       </section>
 
       {/* ── How it works ─────────────────────────────── */}
