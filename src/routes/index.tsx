@@ -455,6 +455,79 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* ── Demo preview ─────────────────────────────── */}
+      <section id="demo" className="relative overflow-hidden px-4 py-24 sm:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-white via-slate-50 to-white" />
+
+        <RevealSection className="mx-auto max-w-3xl text-center">
+          <span className="font-tech text-xs font-bold uppercase tracking-[0.2em]" style={{ color: BRAND.orange }}>Demo ao vivo</span>
+          <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Veja o StockMind em ação
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
+            Um ambiente completo, populado com dados realistas — explore antes mesmo de criar uma conta.
+          </p>
+        </RevealSection>
+
+        <RevealSection delay={120} className="mx-auto mt-14 max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative"
+          >
+            {/* Glow */}
+            <div
+              className="pointer-events-none absolute -inset-6 -z-10 rounded-[32px] opacity-60 blur-2xl"
+              style={{ background: `linear-gradient(135deg, ${BRAND.petrol}40, ${BRAND.emerald}40, ${BRAND.orange}30)` }}
+            />
+
+            {/* macOS-style window frame */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+              <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+                <span className="h-3 w-3 rounded-full bg-red-400" />
+                <span className="h-3 w-3 rounded-full bg-amber-400" />
+                <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                <span className="ml-3 font-tech text-[11px] text-slate-500">stockmind.app/dashboard</span>
+              </div>
+              <img
+                src={demoDashboard}
+                alt="Captura do painel do StockMind mostrando métricas de SKUs, previsão de demanda e atividade recente"
+                width={1600}
+                height={1024}
+                loading="lazy"
+                className="block w-full"
+              />
+            </div>
+
+            {/* Floating cube accent */}
+            <motion.img
+              src={heroCubes}
+              alt=""
+              aria-hidden
+              width={220}
+              height={220}
+              className="pointer-events-none absolute -right-6 -top-10 hidden h-40 w-40 drop-shadow-2xl md:block"
+              animate={{ y: [0, -10, 0], rotate: [0, 4, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={handleTryDemo}
+              className="group inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              style={{ background: `linear-gradient(135deg, ${BRAND.petrol}, ${BRAND.emerald})` }}
+            >
+              Abrir demo agora
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
+        </RevealSection>
+      </section>
+
       {/* ── How it works ─────────────────────────────── */}
       <section id="how" className="px-4 py-24 sm:py-32">
         <RevealSection className="mx-auto max-w-3xl text-center">
