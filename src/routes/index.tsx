@@ -413,9 +413,16 @@ function LandingPage() {
       </section>
 
       {/* ── AI section ───────────────────────────────── */}
-      <section id="ai" className="relative overflow-hidden px-4 py-24 sm:py-32">
-        <div className="pointer-events-none absolute inset-0 -z-10" style={{ background: `linear-gradient(135deg, ${BRAND.petrol}, ${BRAND.emerald})` }} />
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+      <section
+        id="ai"
+        className="relative overflow-hidden px-4 py-24 sm:py-32"
+        style={{ background: `linear-gradient(135deg, ${BRAND.petrol}, ${BRAND.emerald})` }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #fff 1px, transparent 0)", backgroundSize: "32px 32px" }}
+        />
 
         <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-2">
           <RevealSection>
