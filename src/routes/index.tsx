@@ -269,44 +269,8 @@ function HeroVisual() {
   );
 }
 
-function Sparkline() {
-  const points = [22, 28, 25, 33, 30, 38, 36, 44, 42, 52, 48, 58];
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const w = 220;
-  const h = 44;
-  const path = points
-    .map((p, i) => {
-      const x = (i / (points.length - 1)) * w;
-      const y = h - ((p - min) / (max - min)) * h;
-      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(" ");
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="sparkFill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor={BRAND.emerald} stopOpacity="0.35" />
-          <stop offset="100%" stopColor={BRAND.emerald} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${path} L ${w} ${h} L 0 ${h} Z`} fill="url(#sparkFill)" />
-      <motion.path
-        d={path}
-        fill="none"
-        stroke={BRAND.emerald}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.6, ease: "easeOut" }}
-      />
-    </svg>
-  );
-}
-
 /* ─── Page ────────────────────────────────────────────── */
+
 function LandingPage() {
   const { enterDemoMode } = useDemo();
   const navigate = useNavigate();
