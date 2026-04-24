@@ -491,7 +491,7 @@ function LandingPage() {
           <div className="space-y-4">
             {aiCapabilities.map((c, i) => (
               <RevealSection key={c.title} delay={i * 100}>
-                <div className="flex items-start gap-4 rounded-2xl bg-white/12 p-5 backdrop-blur-md ring-1 ring-white/20 transition-all hover:bg-white/18">
+                <div className="flex items-start gap-4 rounded-2xl bg-white/15 p-5 backdrop-blur-md ring-1 ring-white/25 transition-all hover:bg-white/20">
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-lg" style={{ color: BRAND.petrol }}>
                     <c.icon className="h-5 w-5" />
                   </span>
