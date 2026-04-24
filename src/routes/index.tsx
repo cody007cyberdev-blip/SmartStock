@@ -56,6 +56,7 @@ const BRAND = {
 const navLinks = [
   { label: "Recursos", href: "#features" },
   { label: "Inteligência", href: "#ai" },
+  { label: "Demo", href: "#demo" },
   { label: "Como funciona", href: "#how" },
 ];
 
