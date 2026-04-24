@@ -88,19 +88,19 @@ function MovementsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">{t("movements.title")}</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold text-foreground truncate">{t("movements.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("movements.countLabel", { count: filtered.length })}</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-start lg:justify-end">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:shrink-0">
           <CSVExportButton
             data={filtered}
             columns={movementCsvColumns}
             filename={t("movements.csv.filename")}
           />
           <PermissionGate permission="log_movement">
-            <Button onClick={() => setFormOpen(true)} className="gap-1.5 sm:self-start">
+            <Button onClick={() => setFormOpen(true)} className="gap-1.5">
               <Plus className="h-4 w-4" />
               {t("movements.log")}
             </Button>
