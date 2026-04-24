@@ -161,7 +161,7 @@ export function MovementsFilters(props: MovementsFiltersProps) {
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-4">
         <div>
           <Label className="mb-1.5 block text-xs text-muted-foreground">{t("movements.filters.type")}</Label>
           <div className="flex flex-wrap gap-2">
