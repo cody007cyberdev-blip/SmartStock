@@ -42,11 +42,13 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-/* ─── Brand tokens (inline for landing only) ──────────── */
+/* ─── Brand tokens (Ice Blue palette) ──────────────────── */
+import logoCube from "@/assets/logo-cube.png";
+
 const BRAND = {
-  petrol: "#2C5AA0",
-  emerald: "#10B981",
-  orange: "#F97316",
+  petrol: "#0B2A5B",
+  emerald: "#1E6FD9",
+  orange: "#5BC0F8",
 };
 
 const navLinks = [
@@ -176,9 +178,8 @@ function StickyNav({ onTryDemo }: { onTryDemo: () => void }) {
 
 function Logo() {
   return (
-    <span className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl shadow-md" style={{ background: `linear-gradient(135deg, ${BRAND.petrol}, ${BRAND.emerald})` }}>
-      <Brain className="h-5 w-5 text-white" strokeWidth={2.4} />
-      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ background: BRAND.orange }} />
+    <span className="relative inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl shadow-md ring-1 ring-slate-200 bg-gradient-to-br from-slate-50 to-white">
+      <img src={logoCube} alt="StockMind cube logo" width={40} height={40} className="h-9 w-9 object-contain" />
     </span>
   );
 }
