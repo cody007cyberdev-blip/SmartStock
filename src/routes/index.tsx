@@ -186,100 +186,83 @@ function Logo() {
   );
 }
 
-/* ─── Animated hero illustration ──────────────────────── */
+/* ─── Animated 3D hero scene ──────────────────────────── */
 function HeroVisual() {
-  const metrics = [
-    { label: "Acurácia IA", value: "99,2%", color: BRAND.emerald, icon: Brain },
-    { label: "SKUs ativos", value: "12.847", color: BRAND.petrol, icon: Boxes },
-    { label: "Reposições sugeridas", value: "37", color: BRAND.orange, icon: Sparkles },
-  ];
   return (
-    <div className="relative mx-auto h-[420px] w-full max-w-md sm:h-[480px]">
+    <div className="relative mx-auto h-[460px] w-full max-w-xl sm:h-[540px] lg:h-[580px]">
       {/* Floating gradient blobs */}
       <div className="pointer-events-none absolute -left-16 -top-10 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.petrol }} />
       <div className="pointer-events-none absolute -right-10 top-20 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.emerald, animationDelay: "-6s" }} />
       <div className="pointer-events-none absolute bottom-0 left-1/3 h-56 w-56 rounded-full opacity-30 blur-3xl animate-blob" style={{ background: BRAND.orange, animationDelay: "-12s" }} />
 
-      {/* Central card */}
+      {/* 3D rotating cubes (CSS perspective, no deps) */}
+      <motion.img
+        src={heroCubes}
+        alt=""
+        aria-hidden
+        width={1024}
+        height={1024}
+        className="pointer-events-none absolute inset-0 m-auto h-full w-full object-contain drop-shadow-2xl"
+        initial={{ opacity: 0, scale: 0.85, rotate: -6 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0, y: [0, -14, 0] }}
+        transition={{
+          opacity: { duration: 0.9, ease: "easeOut" },
+          scale: { duration: 0.9, ease: "easeOut" },
+          rotate: { duration: 0.9, ease: "easeOut" },
+          y: { duration: 7, repeat: Infinity, ease: "easeInOut" },
+        }}
+      />
+
+      {/* Floating chip — Alert */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="absolute left-1/2 top-1/2 w-[88%] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-2xl backdrop-blur-xl"
+        initial={{ opacity: 0, x: -20, y: -10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 0.9, duration: 0.6 }}
+        className="absolute left-0 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Logo />
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 font-tech">Live</p>
-              <p className="text-sm font-bold text-slate-900">StockMind AI</p>
-            </div>
-          </div>
-          <span className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold" style={{ background: `${BRAND.emerald}15`, color: BRAND.emerald }}>
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: BRAND.emerald }} />
-            Online
-          </span>
-        </div>
-
-        <div className="mt-5 space-y-2.5">
-          {metrics.map((m, i) => (
-            <motion.div
-              key={m.label}
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + i * 0.15, duration: 0.5 }}
-              className="flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-3"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${m.color}18`, color: m.color }}>
-                  <m.icon className="h-4 w-4" />
-                </span>
-                <span className="text-xs font-medium text-slate-600">{m.label}</span>
-              </div>
-              <span className="font-tech text-sm font-bold text-slate-900">{m.value}</span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Mini sparkline */}
-        <div className="mt-4 rounded-xl border border-slate-100 p-3">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-slate-500">Demanda prevista · 7d</span>
-            <span className="font-tech text-[11px]" style={{ color: BRAND.emerald }}>+12,4%</span>
-          </div>
-          <Sparkline />
-        </div>
-      </motion.div>
-
-      {/* Floating chips */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9, duration: 0.5 }}
-        className="absolute -left-2 top-6 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg ring-1 ring-slate-200 animate-float-soft"
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}20`, color: BRAND.orange }}>
+        <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}25`, color: BRAND.orange }}>
           <Bell className="h-3.5 w-3.5" />
         </span>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Alerta</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Alerta IA</p>
           <p className="text-xs font-semibold text-slate-800">Reposição em 3 dias</p>
         </div>
       </motion.div>
 
+      {/* Floating chip — Forecast */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.1, duration: 0.5 }}
-        className="absolute -right-2 bottom-10 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg ring-1 ring-slate-200 animate-float-soft"
+        initial={{ opacity: 0, x: 20, y: 10 }}
+        animate={{ opacity: 1, x: 0, y: 0 }}
+        transition={{ delay: 1.1, duration: 0.6 }}
+        className="absolute right-0 top-1/3 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
         style={{ animationDelay: "-3s" }}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.emerald}20`, color: BRAND.emerald }}>
           <TrendingUp className="h-3.5 w-3.5" />
         </span>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">IA</p>
-          <p className="text-xs font-semibold text-slate-800">Pico em 12 dias</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-tech">Forecast</p>
+          <p className="text-xs font-semibold text-slate-800">+12,4% próx. semana</p>
+        </div>
+      </motion.div>
+
+      {/* Floating chip — Live counter */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.6 }}
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-2xl ring-1 ring-slate-200 backdrop-blur-md"
+      >
+        <span className="relative flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${BRAND.emerald}18`, color: BRAND.emerald }}>
+          <Boxes className="h-4 w-4" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: BRAND.emerald }} />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ background: BRAND.emerald }} />
+          </span>
+        </span>
+        <div className="text-left">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 font-tech">SKUs ativos</p>
+          <p className="font-tech text-sm font-bold text-slate-900">12.847 · ao vivo</p>
         </div>
       </motion.div>
     </div>
