@@ -59,27 +59,25 @@ export function NotificationCenter({ open, onOpenChange, onOpenPrefs }: Notifica
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col">
-        <SheetHeader className="border-b border-border px-4 py-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <SheetTitle className="flex min-w-0 flex-wrap items-center gap-2 text-base">
-              <span className="truncate">{t("notifications.title")}</span>
-              {unreadCount > 0 && (
-                <span className="rounded-full bg-destructive px-2 py-0.5 font-mono text-xs text-destructive-foreground">
-                  {unreadCount}
-                </span>
-              )}
-            </SheetTitle>
-            <div className="flex flex-wrap items-center gap-1 sm:justify-end">
-              {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" className="h-auto max-w-full gap-1 px-2 py-1 text-left text-xs whitespace-normal" onClick={markAllAsRead}>
-                  <CheckCheck className="mr-1 h-3.5 w-3.5" />
-                  {t("notifications.markAllAsRead")}
-                </Button>
-              )}
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenPrefs?.()} aria-label={t("notifications.settings")}>
-                <Settings2 className="h-4 w-4" />
+        <SheetHeader className="border-b border-border px-4 py-3 pr-12">
+          <SheetTitle className="flex min-w-0 flex-wrap items-center gap-2 text-base">
+            <span className="truncate">{t("notifications.title")}</span>
+            {unreadCount > 0 && (
+              <span className="rounded-full bg-destructive px-2 py-0.5 font-mono text-xs text-destructive-foreground">
+                {unreadCount}
+              </span>
+            )}
+          </SheetTitle>
+          <div className="mt-2 flex flex-wrap items-center gap-1">
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" className="h-auto gap-1 px-2 py-1 text-xs whitespace-normal" onClick={markAllAsRead}>
+                <CheckCheck className="mr-1 h-3.5 w-3.5 shrink-0" />
+                {t("notifications.markAllAsRead")}
               </Button>
-            </div>
+            )}
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => onOpenPrefs?.()} aria-label={t("notifications.settings")}>
+              <Settings2 className="h-4 w-4" />
+            </Button>
           </div>
         </SheetHeader>
 
