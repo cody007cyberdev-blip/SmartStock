@@ -190,7 +190,7 @@ function Logo() {
 /* ─── Animated 3D hero scene ──────────────────────────── */
 function HeroVisual() {
   return (
-    <div className="relative mx-auto h-[460px] w-full max-w-xl sm:h-[540px] lg:h-[580px]">
+    <div className="relative mx-auto h-[360px] w-full max-w-xl overflow-hidden sm:h-[480px] sm:overflow-visible lg:h-[580px]">
       {/* Floating gradient blobs */}
       <div className="pointer-events-none absolute -left-16 -top-10 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.petrol }} />
       <div className="pointer-events-none absolute -right-10 top-20 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.emerald, animationDelay: "-6s" }} />
@@ -219,7 +219,7 @@ function HeroVisual() {
         initial={{ opacity: 0, x: -20, y: -10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 0.9, duration: 0.6 }}
-        className="absolute left-0 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
+        className="absolute left-2 top-4 flex max-w-[55%] items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft sm:left-0 sm:top-8 sm:max-w-none"
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}25`, color: BRAND.orange }}>
           <Bell className="h-3.5 w-3.5" />
@@ -235,7 +235,7 @@ function HeroVisual() {
         initial={{ opacity: 0, x: 20, y: 10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.1, duration: 0.6 }}
-        className="absolute right-0 top-1/3 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
+        className="absolute right-2 top-1/3 flex max-w-[55%] items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft sm:right-0 sm:max-w-none"
         style={{ animationDelay: "-3s" }}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.emerald}20`, color: BRAND.emerald }}>
@@ -344,7 +344,7 @@ function LandingPage() {
               <button
                 type="button"
                 onClick={handleTryDemo}
-                className="group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
                 style={{ background: BRAND.orange }}
               >
                 Experimentar grátis
@@ -353,7 +353,7 @@ function LandingPage() {
               <a
                 href="#features"
                 onClick={(e) => { e.preventDefault(); document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" }); }}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-7 py-3.5 text-base font-semibold text-slate-800 transition-all hover:border-slate-400 hover:-translate-y-0.5"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-7 py-3.5 text-base font-semibold text-slate-800 transition-all hover:border-slate-400 hover:-translate-y-0.5 sm:w-auto"
               >
                 Ver recursos
               </a>
