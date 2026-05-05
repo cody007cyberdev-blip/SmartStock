@@ -235,7 +235,7 @@ function HeroVisual() {
         initial={{ opacity: 0, x: 20, y: 10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 1.1, duration: 0.6 }}
-        className="absolute right-0 top-1/3 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
+        className="absolute right-2 top-1/3 flex max-w-[55%] items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft sm:right-0 sm:max-w-none"
         style={{ animationDelay: "-3s" }}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.emerald}20`, color: BRAND.emerald }}>
