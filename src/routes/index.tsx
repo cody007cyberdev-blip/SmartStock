@@ -344,7 +344,7 @@ function LandingPage() {
               <button
                 type="button"
                 onClick={handleTryDemo}
-                className="group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl sm:w-auto"
                 style={{ background: BRAND.orange }}
               >
                 Experimentar grátis
@@ -353,7 +353,7 @@ function LandingPage() {
               <a
                 href="#features"
                 onClick={(e) => { e.preventDefault(); document.querySelector("#features")?.scrollIntoView({ behavior: "smooth" }); }}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-7 py-3.5 text-base font-semibold text-slate-800 transition-all hover:border-slate-400 hover:-translate-y-0.5"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-7 py-3.5 text-base font-semibold text-slate-800 transition-all hover:border-slate-400 hover:-translate-y-0.5 sm:w-auto"
               >
                 Ver recursos
               </a>
