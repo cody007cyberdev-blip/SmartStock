@@ -219,7 +219,7 @@ function HeroVisual() {
         initial={{ opacity: 0, x: -20, y: -10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ delay: 0.9, duration: 0.6 }}
-        className="absolute left-0 top-8 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft"
+        className="absolute left-2 top-4 flex max-w-[55%] items-center gap-2 rounded-full bg-white px-3 py-2 shadow-xl ring-1 ring-slate-200 animate-float-soft sm:left-0 sm:top-8 sm:max-w-none"
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-full" style={{ background: `${BRAND.orange}25`, color: BRAND.orange }}>
           <Bell className="h-3.5 w-3.5" />
