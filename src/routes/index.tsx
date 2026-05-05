@@ -190,7 +190,7 @@ function Logo() {
 /* ─── Animated 3D hero scene ──────────────────────────── */
 function HeroVisual() {
   return (
-    <div className="relative mx-auto h-[460px] w-full max-w-xl sm:h-[540px] lg:h-[580px]">
+    <div className="relative mx-auto h-[360px] w-full max-w-xl overflow-hidden sm:h-[480px] sm:overflow-visible lg:h-[580px]">
       {/* Floating gradient blobs */}
       <div className="pointer-events-none absolute -left-16 -top-10 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.petrol }} />
       <div className="pointer-events-none absolute -right-10 top-20 h-72 w-72 rounded-full opacity-40 blur-3xl animate-blob" style={{ background: BRAND.emerald, animationDelay: "-6s" }} />
