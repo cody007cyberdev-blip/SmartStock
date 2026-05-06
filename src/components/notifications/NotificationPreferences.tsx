@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -49,6 +50,9 @@ export function NotificationPreferences({ open, onOpenChange }: NotificationPref
             <Settings2 className="h-4 w-4" />
             {t("notifications.prefs.title")}
           </DialogTitle>
+          <DialogDescription>
+            {t("notifications.prefs.subtitle", "Choose which notifications you want to receive.")}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
