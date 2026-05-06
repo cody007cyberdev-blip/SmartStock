@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
 
 interface ShortcutsHelpDialogProps {
@@ -15,6 +15,7 @@ export function ShortcutsHelpDialog({ open, onOpenChange }: ShortcutsHelpDialogP
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          <DialogDescription>Quick keys to navigate and create faster.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 text-sm">
