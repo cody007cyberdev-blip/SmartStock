@@ -42,15 +42,15 @@ function LocationsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Locations</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">Locations</h1>
           <p className="text-sm text-muted-foreground">
             {allLocations.length} location{allLocations.length !== 1 && "s"}
           </p>
         </div>
         <PermissionGate permission="create_item">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant="outline"

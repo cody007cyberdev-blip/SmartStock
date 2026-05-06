@@ -138,12 +138,12 @@ function RequestsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">{t("requests.title")}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">{t("requests.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("requests.countLabel", { count: requests.length })}</p>
         </div>
-        <Button size="sm" onClick={() => setFormOpen(true)}>
+        <Button size="sm" onClick={() => setFormOpen(true)} className="self-start sm:self-auto">
           <Plus className="mr-1.5 h-4 w-4" />
           {t("requests.newRequest")}
         </Button>
