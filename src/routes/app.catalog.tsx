@@ -220,12 +220,12 @@ function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">{t("catalog.title")}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold text-foreground sm:text-2xl">{t("catalog.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("catalog.countLabel", { count: items.length })}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CSVExportButton data={items} columns={csvColumns} filename={t("catalog.csv.filename")} />
           <PermissionGate permission="create_item">
             <Button variant="outline" size="sm" className="hidden gap-1.5 sm:inline-flex" onClick={() => setImportOpen(true)}>

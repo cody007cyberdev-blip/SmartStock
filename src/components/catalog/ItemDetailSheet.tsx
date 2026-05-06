@@ -13,6 +13,7 @@ import { PermissionGate } from "@/hooks/usePermissions";
 import { MovementTimeline } from "@/components/catalog/MovementTimeline";
 import { BarcodeDisplay } from "@/components/catalog/BarcodeDisplay";
 import { CustomFieldsTab } from "@/components/catalog/CustomFieldsTab";
+import { ItemForecastPanel } from "@/components/catalog/ItemForecastPanel";
 import { useMovements } from "@/hooks/useInventoryData";
 import { useUpdateItem } from "@/hooks/useInventoryMutations";
 import type { Item, Category, Supplier, Location } from "@/types/inventory";
@@ -107,9 +108,14 @@ export function ItemDetailSheet({
         <Tabs defaultValue="overview" className="px-6 pt-4 pb-8">
           <TabsList className="w-full">
             <TabsTrigger value="overview" className="flex-1">{t("catalog.detail.overview")}</TabsTrigger>
+            <TabsTrigger value="forecast" className="flex-1">Forecast</TabsTrigger>
             <TabsTrigger value="history" className="flex-1">{t("catalog.detail.history")}</TabsTrigger>
             <TabsTrigger value="custom" className="flex-1">{t("catalog.detail.customFields")}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="forecast" className="mt-6">
+            <ItemForecastPanel item={item} />
+          </TabsContent>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30">
