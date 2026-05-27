@@ -1,6 +1,6 @@
 export const pt = {
   common: {
-    appName: "StockMind",
+    appName: "SmartStock",
     tagline: "Inteligência para o seu estoque",
     search: "Pesquisar",
     searchPlaceholder: "Pesquisar...",

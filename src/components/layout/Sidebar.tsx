@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Logo } from "@/shared/ui/Logo";
 import {
   LayoutDashboard,
   Package,
@@ -15,6 +16,7 @@ import {
   ChevronRight,
   HelpCircle,
   ShoppingCart,
+  Database,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -72,6 +74,7 @@ const navGroups: NavGroup[] = [
     permKey: "canAccessSettings",
     items: [
       { labelKey: "nav.settings", href: "/app/settings", icon: Settings },
+      { labelKey: "Teste DB", href: "/app/test-db", icon: Database },
     ],
   },
 ];
@@ -110,9 +113,8 @@ export function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
 
   return (
     <nav data-tour="sidebar" className={cn("flex h-full flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200", collapsed ? "w-16" : "w-[260px]")}>
-      <div className={cn("flex h-14 items-center gap-2", collapsed ? "justify-center px-2" : "px-5")}>
-        <Brain className="h-5 w-5 text-sidebar-primary" />
-        {!collapsed && <span className="text-lg font-semibold tracking-tight text-sidebar-primary-foreground">StockMind</span>}
+      <div className={cn("flex h-20 items-center gap-2", collapsed ? "justify-center px-2" : "px-5")}>
+        <Logo showText={!collapsed} className={collapsed ? "scale-75" : ""} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-2">

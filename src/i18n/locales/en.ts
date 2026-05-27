@@ -2,7 +2,7 @@ import type { Translations } from "./pt";
 
 export const en: Translations = {
   common: {
-    appName: "StockMind",
+    appName: "SmartStock",
     tagline: "Intelligence for your inventory",
     search: "Search",
     searchPlaceholder: "Search...",
