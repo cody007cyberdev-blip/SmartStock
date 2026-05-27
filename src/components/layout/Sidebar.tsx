@@ -14,6 +14,7 @@ import {
   Settings,
   ChevronRight,
   HelpCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -52,6 +53,7 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: "nav.suppliers", href: "/app/suppliers", icon: Truck },
       { labelKey: "nav.purchaseOrders", href: "/app/purchase-orders", icon: ClipboardList },
+      { labelKey: "vendorPanel.title", href: "/app/vendor-panel", icon: ShoppingCart },
     ],
   },
   {

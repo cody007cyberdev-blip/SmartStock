@@ -23,9 +23,9 @@
 }
 
 /*
- * StockMind Design System
+ * SmartStock Design System
  *
- * Teal/amber palette per design-guidelines.md.
+ * Orange & White light theme with minimalist design.
  * All colors use oklch format. Semantic tokens only.
  */
 
@@ -34,9 +34,9 @@
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-brand: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-tech: "Space Mono", ui-monospace, monospace;
-  --color-brand-petrol: var(--brand-petrol);
-  --color-brand-emerald: var(--brand-emerald);
   --color-brand-orange: var(--brand-orange);
+  --color-brand-white: var(--brand-white);
+  --color-brand-gray: var(--brand-gray);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -80,66 +80,66 @@
   --color-stock-healthy: var(--stock-healthy);
   --color-stock-low: var(--stock-low);
   --color-stock-out: var(--stock-out);
-  --color-amber-accent: var(--amber-accent);
+  --color-orange-accent: var(--orange-accent);
 }
 
 :root {
   --radius: 0.625rem;
 
-  /* Core palette — Ice Blue (inspired by frozen cube reference) */
-  --background: oklch(0.985 0.008 240);
-  --foreground: oklch(0.20 0.05 250);
+  /* Core palette — Light theme with Orange & White */
+  --background: oklch(0.98 0.003 0);
+  --foreground: oklch(0.25 0.05 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.05 250);
+  --card-foreground: oklch(0.25 0.05 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.05 250);
-  --primary: oklch(0.55 0.18 245);
-  --primary-foreground: oklch(0.99 0.005 240);
-  --secondary: oklch(0.92 0.04 230);
-  --secondary-foreground: oklch(0.25 0.08 250);
-  --muted: oklch(0.95 0.015 235);
-  --muted-foreground: oklch(0.50 0.04 245);
-  --accent: oklch(0.92 0.06 220);
-  --accent-foreground: oklch(0.22 0.08 250);
+  --popover-foreground: oklch(0.25 0.05 0);
+  --primary: oklch(0.65 0.25 40);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.01 0);
+  --secondary-foreground: oklch(0.25 0.05 0);
+  --muted: oklch(0.92 0.01 0);
+  --muted-foreground: oklch(0.60 0.02 0);
+  --accent: oklch(0.68 0.22 40);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.60 0.22 25);
-  --destructive-foreground: oklch(0.99 0.005 240);
-  --border: oklch(0.90 0.02 235);
-  --input: oklch(0.92 0.02 235);
-  --ring: oklch(0.55 0.18 245);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.90 0.01 0);
+  --input: oklch(0.95 0.005 0);
+  --ring: oklch(0.65 0.25 40);
 
   /* Charts */
-  --chart-1: oklch(0.55 0.18 245);
-  --chart-2: oklch(0.70 0.15 220);
-  --chart-3: oklch(0.40 0.16 255);
+  --chart-1: oklch(0.65 0.25 40);
+  --chart-2: oklch(0.72 0.20 35);
+  --chart-3: oklch(0.58 0.28 45);
   --chart-4: oklch(0.60 0.22 25);
-  --chart-5: oklch(0.50 0.04 245);
+  --chart-5: oklch(0.70 0.15 50);
 
-  /* Sidebar — deep frozen navy */
-  --sidebar: oklch(0.18 0.06 255);
-  --sidebar-foreground: oklch(0.88 0.03 230);
-  --sidebar-primary: oklch(0.65 0.18 235);
-  --sidebar-primary-foreground: oklch(0.99 0.005 240);
-  --sidebar-accent: oklch(0.25 0.07 252);
-  --sidebar-accent-foreground: oklch(0.95 0.02 230);
-  --sidebar-border: oklch(0.27 0.06 252);
-  --sidebar-ring: oklch(0.65 0.18 235);
+  /* Sidebar — Light orange with white text */
+  --sidebar: oklch(0.65 0.25 40);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.72 0.22 38);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.58 0.28 45);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.60 0.20 42);
+  --sidebar-ring: oklch(0.72 0.22 38);
 
   /* Metric tints */
   --metric-healthy-bg: oklch(0.96 0.04 200);
-  --metric-warning-bg: oklch(0.96 0.04 75);
+  --metric-warning-bg: oklch(0.96 0.04 40);
   --metric-danger-bg: oklch(0.96 0.04 25);
-  --metric-neutral-bg: oklch(0.96 0.04 235);
+  --metric-neutral-bg: oklch(0.96 0.04 0);
 
   /* Stock status tokens */
   --stock-healthy: oklch(0.62 0.16 200);
-  --stock-low: oklch(0.75 0.15 75);
+  --stock-low: oklch(0.75 0.15 40);
   --stock-out: oklch(0.60 0.22 25);
-  --amber-accent: oklch(0.75 0.15 75);
+  --orange-accent: oklch(0.68 0.22 40);
 
-  /* StockMind brand palette — Ice Blue */
-  --brand-petrol: oklch(0.40 0.16 255);
-  --brand-emerald: oklch(0.62 0.18 230);
-  --brand-orange: oklch(0.78 0.14 215);
+  /* SmartStock brand palette — Orange & White */
+  --brand-orange: oklch(0.65 0.25 40);
+  --brand-white: oklch(1 0 0);
+  --brand-gray: oklch(0.92 0.01 0);
 }
 
 .dark {
@@ -182,15 +182,15 @@
 
   /* Metric tints (dark) */
   --metric-healthy-bg: oklch(0.28 0.07 220);
-  --metric-warning-bg: oklch(0.30 0.08 75);
+  --metric-warning-bg: oklch(0.30 0.08 40);
   --metric-danger-bg: oklch(0.30 0.10 25);
   --metric-neutral-bg: oklch(0.26 0.06 252);
 
   /* Stock status tokens */
   --stock-healthy: oklch(0.72 0.15 215);
-  --stock-low: oklch(0.78 0.14 75);
+  --stock-low: oklch(0.78 0.14 40);
   --stock-out: oklch(0.68 0.22 25);
-  --amber-accent: oklch(0.78 0.14 75);
+  --orange-accent: oklch(0.78 0.14 40);
 }
 
 @theme inline {
@@ -253,7 +253,7 @@
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
-/* StockMind landing page animations */
+/* SmartStock landing page animations */
 @keyframes float-soft {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
